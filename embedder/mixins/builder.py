@@ -2,7 +2,6 @@ import json
 import os
 import faiss
 import numpy as np
-from tqdm import tqdm
 from sentence_transformers import SentenceTransformer
 
 
@@ -15,6 +14,9 @@ class EmbeddingBuilder:
         self.model = SentenceTransformer(model_name, device=device)
 
     def build_embeddings(self, chunks_path: str):
+        """
+        Строит эмбеддинги для одного .jsonl файла
+        """
         texts = []
         metadatas = []
 
@@ -22,9 +24,7 @@ class EmbeddingBuilder:
             for line in f:
                 obj = json.loads(line)
                 texts.append("passage: " + obj["text"])
-                metadatas.append(obj["metadata"])
-
-        print(f"Loaded {len(texts)} chunks")
+                metadatas.append({**obj["metadata"], "text": obj["text"]})
 
         embeddings = self.model.encode(
             texts,
@@ -34,6 +34,36 @@ class EmbeddingBuilder:
         )
 
         return embeddings, metadatas
+
+    def build_embeddings_from_dir(self, chunks_dir: str):
+        """
+        Строит эмбеддинги для ВСЕХ файлов в директории
+        """
+        all_texts = []
+        all_metadatas = []
+
+        files = sorted(f for f in os.listdir(chunks_dir) if f.endswith(".jsonl"))
+
+        for fname in files:
+            path = os.path.join(chunks_dir, fname)
+            print(f"Embedding: {fname}")
+
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    obj = json.loads(line)
+                    all_texts.append("passage: " + obj["text"])
+                    all_metadatas.append(obj["metadata"])
+
+        print(f"Total chunks: {len(all_texts)}")
+
+        embeddings = self.model.encode(
+            all_texts,
+            batch_size=16,
+            show_progress_bar=True,
+            normalize_embeddings=True,
+        )
+
+        return embeddings, all_metadatas
 
     def save_faiss(
         self,

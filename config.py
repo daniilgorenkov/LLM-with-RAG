@@ -9,6 +9,7 @@ class Paths:
     CHUNKS = os.path.join(DATA, "chunks")
     CLEAN_DOCS = os.path.join(DATA, "clean_docs")
     REFERENCES = os.path.join(DATA, "references")
+    VECTORS = os.path.join(DATA, "vectors")
 
 
 class PreprocessorConfig:

@@ -99,6 +99,11 @@ class TextCleaner:
             lines.append(line)
         return "\n".join(lines)
 
+    def remove_bad_chars(self, text: str) -> str:
+        text = text.replace("***f***", "")
+        text = text.replace("�", "")
+        return text
+
     def remove_lonely_math_lines(self, text: str) -> str:
         return re.sub(r"^\s*[-=+*/()\[\]0-9a-zA-Z\s]{5,}\s*$", "", text, flags=re.M)
 
@@ -124,6 +129,8 @@ class TextCleaner:
         text = self.fix_scientific_notation(text)
         text = self.replace_broken_formulas(text)
         text = self.normalize_tables(text)
+        text = self.remove_bad_chars(text)
+        text = self.remove_front_matter(text)
         text = self.remove_repeated_math_tokens(text)
         text = self.remove_strikethrough(text)
         text = self.remove_garbled_lines(text)

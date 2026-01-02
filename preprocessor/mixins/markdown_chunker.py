@@ -13,9 +13,35 @@ class MarkdownChunker:
         self.max_chars = max_chars
         self.overlap = overlap
 
+    def is_valid_header(self, header: str) -> bool:
+        """
+        Проверяет, является ли заголовок осмысленным,
+        а не формулой или мусором из PDF
+        """
+        header = header.strip()
+
+        # слишком короткий
+        if len(header) < 5:
+            return False
+
+        # слишком длинный (обычно формулы)
+        if len(header) > 120:
+            return False
+
+        # если нет букв — почти наверняка формула
+        if not re.search(r"[A-Za-zА-Яа-я]", header):
+            return False
+
+        # если слишком много спецсимволов
+        if sum(c in "=⋅∑εσλμ√^_" for c in header) > 3:
+            return False
+
+        return True
+
     def split_by_headers(self, text: str):
         """
-        Разбивает markdown по заголовкам, сохраняя уровень
+        Разбивает markdown по заголовкам, сохраняя уровень.
+        Формульные и мусорные заголовки игнорируются.
         """
         pattern = r"(#{1,6})\s+(.*)"
         lines = text.splitlines()
@@ -26,14 +52,23 @@ class MarkdownChunker:
         for line in lines:
             match = re.match(pattern, line)
             if match:
+                level = len(match.group(1))
+                header = match.group(2).strip()
+
+                # ❗ фильтрация мусорных заголовков
+                if not self.is_valid_header(header):
+                    current["content"].append(line)
+                    continue
+
                 # сохранить предыдущую секцию
                 if current["content"]:
                     sections.append(current)
 
-                level = len(match.group(1))
-                header = match.group(2).strip()
-
-                current = {"header": header, "level": level, "content": []}
+                current = {
+                    "header": header,
+                    "level": level,
+                    "content": [],
+                }
             else:
                 current["content"].append(line)
 
@@ -62,7 +97,7 @@ class MarkdownChunker:
 
         return chunks
 
-    def chunk(self, text: str, doc_id: str, metadata) -> List[Dict]:
+    def chunk(self, text: str, doc_id: str, metadata: Dict) -> List[Dict]:
         """
         Главный метод
         """
@@ -85,6 +120,7 @@ class MarkdownChunker:
                             "section": sec["header"],
                             "level": sec["level"],
                             "chunk_id": i,
+                            "text": section_text,
                             **metadata,
                         },
                     }
