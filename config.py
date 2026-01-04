@@ -15,3 +15,4 @@ class Paths:
 class PreprocessorConfig:
 
     FILE_EXTENTIONS = ["pdf", "docx", "txt"]
+    BAD_CHARS = ["\xad\n\n", "\x0c", "\n\n", "\xad", "�", "\u200b", "***f***"]

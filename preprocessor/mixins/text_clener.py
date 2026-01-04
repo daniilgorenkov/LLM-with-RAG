@@ -1,5 +1,5 @@
 import re
-from pathlib import Path
+from config import PreprocessorConfig
 from markdowncleaner import MarkdownCleaner
 
 
@@ -100,12 +100,52 @@ class TextCleaner:
         return "\n".join(lines)
 
     def remove_bad_chars(self, text: str) -> str:
-        text = text.replace("***f***", "")
-        text = text.replace("�", "")
+        for char in PreprocessorConfig.BAD_CHARS:
+            text = text.replace(char, "")
         return text
 
     def remove_lonely_math_lines(self, text: str) -> str:
         return re.sub(r"^\s*[-=+*/()\[\]0-9a-zA-Z\s]{5,}\s*$", "", text, flags=re.M)
+
+    def normalize_markdown_tables(self, text: str) -> str:
+        """
+        Преобразует markdown-таблицы в читаемый текст
+        """
+        lines = text.splitlines()
+        new_lines = []
+        table_buffer = []
+
+        def flush_table(table):
+            if not table:
+                return []
+
+            rows = [r.strip("|").split("|") for r in table]
+            rows = [[c.replace("<br>", " ").strip() for c in row] for row in rows]
+
+            header = rows[0]
+            body = rows[1:]
+
+            out = []
+            for row in body:
+                for h, v in zip(header, row):
+                    if v:
+                        out.append(f"{h}: {v}")
+                out.append("")  # пустая строка между записями
+            return out
+
+        for line in lines:
+            if line.strip().startswith("|") and "|" in line:
+                table_buffer.append(line)
+            else:
+                if table_buffer:
+                    new_lines.extend(flush_table(table_buffer))
+                    table_buffer = []
+                new_lines.append(line)
+
+        if table_buffer:
+            new_lines.extend(flush_table(table_buffer))
+
+        return "\n".join(new_lines)
 
     def split_references(self, text: str):
         pattern = r"\n(?:#+\s*)?(references|bibliography|literature|список литературы)\b.*\n"
@@ -121,6 +161,7 @@ class TextCleaner:
     def clean_text(self, text: str):
         text = self.cleaner.clean_markdown_string(text)
         metadata = self.extract_metadata(text)
+        text = self.normalize_markdown_tables(text)
         text = self.replace_display_formulas(text)
         text = self.replace_inline_formulas(text)
         text = self.remove_latex_commands(text)

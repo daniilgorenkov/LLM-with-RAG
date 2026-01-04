@@ -1,7 +1,3 @@
-from collections import defaultdict
-from typing import List, Dict
-
-
 class ContextBuilder:
     def __init__(self, max_chars: int = 3000):
         self.max_chars = max_chars
@@ -11,14 +7,18 @@ class ContextBuilder:
         seen = set()
         total_len = 0
 
-        for r in results:
+        for i, r in enumerate(results, 1):
             text = r["text"]
+            meta = r["metadata"]
 
             if text in seen:
                 continue
 
             seen.add(text)
-            context_parts.append(f"[Источник: {r['doc_id']} | {r['section']}]\n{text}")
+
+            header = f"[{i}] {meta['doc_id']} — {meta.get('section', 'ROOT')}"
+
+            context_parts.append(f"{header}\n{text}")
 
             total_len += len(text)
             if total_len > self.max_chars:

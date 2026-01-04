@@ -2,14 +2,14 @@ import sys
 import os
 
 # print(sys.path)
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from config import PreprocessorConfig, Paths
 
 from argparse import ArgumentParser
-from mixins.file_converter import FilePreprocessor
-from mixins.text_clener import TextCleaner
-from mixins.markdown_chunker import MarkdownChunker
+from preprocessor.mixins.file_converter import FilePreprocessor
+from preprocessor.mixins.text_clener import TextCleaner
+from preprocessor.mixins.markdown_chunker import MarkdownChunker
 
 
 args = ArgumentParser()
