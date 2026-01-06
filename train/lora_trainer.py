@@ -124,12 +124,14 @@ class LoraQATrainer:
             save_steps=self.max_steps // 3,
             save_total_limit=3,
             optim="paged_adamw_8bit",  # отлично работает с 4bit
-            fp16=True,
+            # fp16=True,
             bf16=False,
             report_to="none",
             warmup_steps=20,
             gradient_checkpointing=True,  # экономит память
             dataloader_drop_last=True,
+            auto_find_batch_size=False,  # Иногда помогает
+            use_legacy_prediction_loop=False,  # Стандартное значение
         )
 
         self.trainer = SFTTrainer(

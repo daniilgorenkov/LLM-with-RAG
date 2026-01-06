@@ -23,7 +23,9 @@ class PreprocessorConfig:
 
 
 class LLMConfig:
-    ONLINE: bool = True
+    ONLINE: bool = False
+    BASE_MODEL: str = "Qwen/Qwen2.5-1.5B-Instruct"
+    LORA_PATH: str = Paths.LORA_QWEEN
 
 
 class CommonConfig:

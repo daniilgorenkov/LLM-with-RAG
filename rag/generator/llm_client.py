@@ -1,6 +1,6 @@
 import os
 import re
-from config import CommonConfig, Paths
+from config import CommonConfig, Paths, LLMConfig
 from openai import OpenAI, RateLimitError
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
@@ -24,10 +24,9 @@ class LLMClient:
             self.model = model
 
     def _load_offline_model(self):
-        model_name = "Qwen/Qwen2.5-1.5B-Instruct"
 
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", dtype=torch.float16)
+        self.tokenizer = AutoTokenizer.from_pretrained(LLMConfig.BASE_MODEL)
+        self.model = AutoModelForCausalLM.from_pretrained(LLMConfig.BASE_MODEL, device_map="auto", dtype=torch.float16)
         return self.tokenizer, self.model
 
     def _check_model_status(self):
