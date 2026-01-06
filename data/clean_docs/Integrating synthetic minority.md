@@ -1,0 +1,73 @@
+# Integrating synthetic minority oversampling and gradient boosting decision tree for bogie fault diagnosis in rail vehiclesBogies are critical components of a rail vehicle, which are important for the safe operation of rail transit. In this study, the
+under four different operating conditions. The authors selected 15 feature indexes – that ranged from time-domain,
+energy, and entropy – as well as their correlations. The adaptive synthetic sampling approach–gradient boosting decision
+tree (ADASYN–GBDT) method is proposed for the bogie fault diagnosis. A comparison between ADASYN–GBDT and
+the three commonly used classifiers (K-nearest neighbor, support vector machine, and Gaussian naı¨ve Bayes), combined with random forest as the feature selection, was done under different test data sizes. A confusion matrix was used to evaluate those classifiers. In K-nearest neighbor, support vector machine, and Gaussian naı¨ve Bayes, the optimal features should be selected first, while the proposed method of this study does not need to select the optimal features. K-nearest
+neighbor, support vector machine, and Gaussian naı¨ve Bayes produced inaccurate results in multi-class identification. It
+can be seen that the lowest false detection rates of the proposed ADASYN–GBDT model are 92.95% and 87.81% when proportion of the test dataset is 0. and 0.9, respectively. In addition, the ADASYN–GBDT model has the ability to
+correctly identify a fault, which makes it more practical and suitable for use in railway operations. The entire process
+(training and testing) was finished in 2.4231 s and the detection procedure took 0.0027 s on average. The results show that the proposed ADASYN–GBDT method satisfied the requirements of real-time performance and accuracy for online
+fault detection. It might therefore aid in the fault detection of bogies.Bogie, fault diagnosis, gradient boosting decision tree, adaptive synthetic sampling approach, imbalance dataset,account for a substantial 21.1% based on the accumulation of failure data in a couple of years. Thus, it failure of bogies through changing model parameters. A rail vehicle bogie basically consists of a coupling, gear box, etc.), a primary suspension mechanism (air spring, etc.), and so on. As illustratedmachine learning methods. In this process, it is usually assumed that the instance number of all classes inYong Qin, Beijing Jiaotong University, No. 3, Shang Yuan Cun, Hai Dianconditions, which are the minority classes in the dataset, and misclassification of those classes comes at a
+fault diagnosis. Another essential issue is the algorithm efficiency problem. Actual data are more complicated than the simulated ones. In order to obtain Dimensionality reduction method like principal component analysis (PCA) is necessary for rapid calculation. However, such procedure is also time
+the method and principle should be clear for controllable results. Therefore, a controllable algorithmsamples by altering the samples in the dataset distribution. The synthetic minority oversampling technique (SMOTE) is a popular method proposed by
+However, SMOTE would be problematic of categories overlap on newly generated samples, as it
+without considering that the selected K-nearest neighborhoods were not in the same class of the current sample points. Adaptive synthetic (ADASYN) sampling approach overcame the previous problem of
+to recognize abnormal heart sounds and got a sensitivity improvement of 58.6–84.4%. It can not only shift the decision boundary to focus on those difficultto-learn samples. However, bogie fault diagnosis is abogie fault diagnosis. Many researches had been conducted on different classifiers for fault diagnosis of the together with SVM to classify and identify the operating conditions of high-speed train bogies. But it worked on a binary system. To the best of our knowledge, most of them are expensive, time consuming or both less time computation and multi-class identification with consideration of imbalanced dataset in the is incorporated to correct the mistakes made by previous base models. Therefore, the gradient boosting classifier. Moreover, GBDT derives feature contributing information from the fitted regression trees,
+timeliness on EEG, online visual tracking, prediction of hospital transfer and mortality, as well as
+short-term subway ridership. There are limited studies on the application of tree-based ensemble methods in rail vehicle fault diagnosis, and GBDT gets
+problem; and GBDT works for achieving high classification accuracy and reduced time consumption.
+from a Chinese subway company is used in the validation. A plain probe into the real-running data is also
+made to give a preliminary complex vibration characteristic of the bogie, in this paper.diagnostic performance of a bogie fault, with consideration of the class imbalance dataset. GBDT worksand operating implicity. By combining weak classification models, typically decision tree, with ‘poor’ performance, it usually produces high classification accuracy,systems. It increases the size of the minority class adaptively according to their density distributions, and1. Calculate the ratio of class imbalance of second2. If rN1 > rth, there is no need to generate newgeneration of the synthetic data. It represents the percentage of sample in minority class after generation to that in majority class. A fully balanced dataset is created when ¼ 1, which means the number of samples( [P] n¼1 [E][^][n][,][N][][ ¼][ 1), we normalized][ E][n][,][N][][ according to]and compare them with rth, calculate the number of synthetic data examples that need to beADASYN is a data per-processing method which balances the dataset for classification in next procedurein fault diagnosis individually or in combination. [18–22] The energy and entropy parameters,
+reduction can improve the model generalization ability, and avoid over-fitting. It is a necessary step whenfunction is used in the sequential error-correcting process to converge to an accurate model. GBDT classifier learns from part of the features instead of learning
+The procedure for the ADASYN–GBDT basedbogie fault detection method is as follows.1. Feature extraction. We calculate 12 time-domain
+parameters, RMS, peak, skewness, kurtosis, skewness factor, kurtosis factor, shape factor, crest
+2. Identify whether the training dataset is imbalanced
+3. They are sent to ADASYN method to resample4. Train the GBDT model. Cross-validation is conducted here in order to limit problems like overfitting. The processed dataset is divided into two
+5. New sample identification. The new sample is sentA bogie does a critical role in railway vehicle operation. It supports the car body, transfers load, traction and braking force between wheel–rail and car
+examples of bogie failure modes which are not acceptable even in safe operation.We present a simplified structure of the signal acquisition network on the railway vehicle (shown in1. Vibration and temperature compound sensor is2. Access point transfers data from the sensors to
+fusion point. Signal isolation processing, analogto-digital conversion, and digital signal filtering
+3. Fusion point and network point are used to do
+4. Service host receives data from the network point,
+and divides them into packets, then does data direction controlling and storage based on differentMore details of this system are beyond our competence, and cannot be provided in this paper.Data preparation. Real-running vibration data of railway vehicles provided by a Chinese subway company metro depot at a speed of 35 5 km=h while gathering the data. The schematic of the bogie and locations
+the half wear (also the mean value) wheel diameter to compute the rotate speed, which is about
+The dataset consists of four types of bogie conditions, operation with no trouble (Normal), wheel outof-roundness or flat (Fault 1), shaft misalignmentlarger than that in normal ones (shown as red rectangles in Figure 7). Vibration shows slight difference1. The velocity is hard to stay stable while testing,
+2. The data were collected on the same type vehicle,3. As faults occur occasionally, fault data are much
+smaller in size than those data in normal condition. The typical imbalance characteristic makes
+4. Determination of vehicle failure and seizing theThe complex relations between features, non-stationary of the signal, the class imbalance problem,
+together with the high accuracy and efficiency requirement make online bogie multi-fault detection verydifficult. Experiments are conducted in the next section to show how efficient the integrated model is.To test the effectiveness and robustness of the proposed ADASYN–GBDT method, this section comprehensively evaluates the performance of KNN,
+SVM, GaussianNB methods under different proportions of the test dataset.It is also a lazy algorithm that does not use the training data points to do any generalization. In otherSVM showed state-of-the-art performance in realworld applications such as text categorization andNaı¨ve Bayes is totally different from other classifiers. Compared to most of the other classification
+the relationship between feature X and output Y directly, or the decision function Y ¼ f(X), or the conditional distribution P(YjX) - Naı¨ve Bayes is a
+generated method. It tries to find out the joint distribution P(X, Y) of feature X and output Y, then getsvisualization of the performance of an algorithm, typically a supervised learning one, also known as an the instances in a predicted class, while each row represents the instances in an actual class.
+This allows a more detailed analysis than mere proportion of correct guesses (accuracy). Accuracy iswith the KNN method, we set the number of neighbors used to be 10, and all points in each neighborhood are weighted equally. Euclidean distance is used
+0.8, the deviance loss function is chosen as the deviance for classification with probabilistic outputs, and
+stages to perform and the maximum depth of the individual regression estimators are 100 and 4, respectively. The Friedman mean squared error with1. Performance comparison is taken between
+the superiority on imbalanced dataset. The proportion of the test dataset is set to be 0.4.sample number that is classified into the corresponding classes, as shown in the stripe on the right of eachTrue condition Condition positive True positive (TP) False negative (FN)0.5088. And about 25.97% of samples in Fault 3 condition were misclassified as Fault 1. That may be caused by the assumption that features are independent between each other, as well as the feature distribution of normal, Fault 2 and Fault 3 samples in eachKNN: K-nearest neighbor; GaussianNB: Gaussian naı¨ve Bayes; ADASYN–GBDT: adaptive synthetic sampling approach–gradientminority classes. While GBDT derives feature contributing information from the fitted regression trees
+which intrinsically perform feature selection by choosing appropriate split points, it is able to handle different types of predictor variables with fit complex
+models, typically decision tree, with ‘poor’ performance, it usually produces high classification accuracy.
+little data preprocessing, and is able to handle different types of predictor variables with fit complex nonlinear relationship. It works pretty well in bogie multiADASYN–GBDT: adaptive synthetic sampling approach–gradient boosting decision tree.We ran 100 trials and calculated the average execute time of each method as illustrated in Table 2.
+algorithm, which means our proposed method satisfies the requirements of real-time performance and2. Performance comparison is taken under different
+proportions of the test dataset to show the generalization ability of our ADASYN–GBDT method.the lowest fault detection rate is still 87.81% (detection of Fault 2, shown in Figure 9(d)). False positive surprise that the higher ratio of Fault 2 was misclassified into Fault 1 than into normal and Fault 3investigated to detect bogie fault, with the consideration of imbalanced data of multi-classes which is more suitable for multi-class imbalanced data classification with regard to its effectiveness and robustness
+Our future work will explore the signal characteristics to extract more effective features. The classifier
+because such a problem is more prominent in diagnosing a bogie fault in a practical situation.1. Guo L, Wang Y and Zhu L. Failure mode and effect
+model calibration of a railway vehicle based on experimental modal parameters. Veh Syst Dyn 2013; 51:
+4. Japkowicz N and Stephen S. The class imbalance problem: A systematic study. Intell Data Anal 2002; 6:
+5. Haibo H and Garcia EA. Learning from imbalanced
+6. Liu X-Y and Zhou Z-H. The influence of class imbalance on cost-sensitive learning: An empirical study. In:
+on the performance of cost-sensitive boosting algorithms with different levels of class imbalance. Math In: IEEE international joint conference on neural networks, Hong Kong, China, 1–8
+10. Hu h, Tang B, Gong X-j, et al. Intelligent fault diagnosis of the high-speed train with big data based on deep
+11. Liu J, Li Y-F and Zio E. A SVM framework for fault
+13. Friedman JH. Greedy function approximation: A
+14. Yang T, Chen W and Cao G. Automated classification
+of neonatal amplitude-integrated EEG based on gradient boosting method. Biomed Signal Process Control16. Xie J and Coggeshall S. Prediction of transfers to tertiary care and hospital mortality: A gradient boosting
+18. Borghesani P, Pennacchi P and Chatterton S. The relationship between kurtosis- and envelope-based indexes
+23. Koller D and Sahami M. Toward optimal feature
+24. Hall MA and Holmes G. Benchmarking attribute
+25. Chirici G, Scotti R, Montaghi A, et al. Stochastic gradient boosting classification trees for forest fuel types
+26. Dong XM. How high-speed EMUs works and their structure characters. Beijing, China: China Railway
+29. Shi H, Wang J, Dai H, et al. Car body vibration analysis subject to coupling misalignment in traction system
+30. Yigit H. A weighting approach for KNN classifier. In:
+31. Song Y, Liang J, Lu J, et al. An efficient instance selection algorithm for k nearest neighbor regression.through two-dimensional solution surface for cost-sensitive SVM. IEEE Trans Pattern Anal Mach Intell 2017;
+35. Li C, Chen D and Yang L. Research on fault detection36. Roiger RJ. Data mining: A tutorial-based primer. Boca
+37. Patil PS, Choudhary N and Amalnerkar A. Predicting
+38. Stehman SV. Selecting and interpreting measures of
+39. Jain A. Complete guide to parameter tuning in gradient

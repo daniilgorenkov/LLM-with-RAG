@@ -23,7 +23,7 @@ class PreprocessorConfig:
 
 
 class LLMConfig:
-    ONLINE: bool = False
+    ONLINE: bool = True
 
 
 class CommonConfig:

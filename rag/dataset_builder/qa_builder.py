@@ -12,6 +12,7 @@ import random
 import re
 from rag.generator.llm_client import LLMClient
 from tqdm import tqdm
+import pymorphy3
 from utils.custom_logger import set_logger
 
 logger = set_logger(Paths.LOG_FILE)
@@ -69,9 +70,22 @@ class QADatasetBuilder:
     ):
         self.max_contexts = max_contexts
         self.llm_asker = LLMClient(online=LLMConfig.ONLINE)
+        self.morph = pymorphy3.MorphAnalyzer()
 
-    @staticmethod
-    def is_good_qa(question: str, answer: str, context: str) -> bool:
+    def lemmatize_words(self, text: str):
+        """
+        Возвращает множество лемм слов длиной >=5 букв из текста.
+        """
+
+        words = re.findall(r"[а-яa-z]{5,}", text.lower())
+        lemmas = set()
+        for w in words:
+            lemma = self.morph.parse(w)[0].normal_form  # берём наиболее вероятную лемму
+            if len(lemma) >= 5:
+                lemmas.add(lemma)
+        return lemmas
+
+    def is_good_qa(self, question: str, answer: str, context: str) -> bool:
         # 1. Пустые поля
         if not question or not answer:
             return False
@@ -81,13 +95,9 @@ class QADatasetBuilder:
         c = context.strip()
 
         # 2. Слишком коротко / слишком длинно
-        if len(q) < 10:
+        if len(q) < 10 or len(a) < 10:
             return False
 
-        if len(a) < 10:
-            return False
-
-        # ответ не должен быть длиннее контекста
         if len(a) > len(c) * 0.8:
             return False
 
@@ -100,15 +110,15 @@ class QADatasetBuilder:
             return False
 
         if re.search(r"[а-яa-z]{2,}$", a) is None:
-            # заканчивается странно
             return False
 
         # 5. Эвристика: хотя бы часть ответа есть в контексте
-        key_words = [w for w in re.findall(r"[а-яa-z]{5,}", a.lower())]
+        answer_lemmas = self.lemmatize_words(a)
+        context_lemmas = self.lemmatize_words(c)
 
-        overlap = sum(1 for w in key_words if w in c.lower())
+        overlap = answer_lemmas.intersection(context_lemmas)
 
-        if overlap == 0:
+        if len(overlap) == 0:
             return False
 
         return True
@@ -234,5 +244,5 @@ class QADatasetBuilder:
 
 if __name__ == "__main__":
     builder = QADatasetBuilder()
-    builder.build(num_samples=1500)
+    builder.build(num_samples=20)
     builder.qa_to_lora_format()
