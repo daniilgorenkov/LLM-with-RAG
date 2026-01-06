@@ -11,6 +11,9 @@ class Paths:
     REFERENCES = os.path.join(DATA, "references")
     VECTORS = os.path.join(DATA, "vectors")
     LOG_FILE = os.path.join(WORKDIR, "log.log")
+    QA_DATASET = os.path.join(DATA, "qa_dataset.jsonl")
+    QA_LORA_DATASET = os.path.join(DATA, f"qa_lora.jsonl")
+    LORA_QWEEN = os.path.join(DATA, "lora_qween")
 
 
 class PreprocessorConfig:
@@ -26,3 +29,14 @@ class LLMConfig:
 class CommonConfig:
 
     DEVICE = "cuda"
+
+
+class LoRAConfig:
+
+    R = 8
+    LORA_ALPHA = 16
+    LORA_DROPOUT = 0.05
+    TARGET_MODULES = ["q_proj", "v_proj"]
+    BATCH_SIZE = 1
+    EPOCHS = 300
+    GRAD_ACCUM = 8

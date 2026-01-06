@@ -207,7 +207,32 @@ class QADatasetBuilder:
             samples_raw = self.build_qa_samples(sample_chunk)
             self.save(samples_raw, os.path.join(Paths.DATA, "qa_dataset.jsonl"))
 
+    def qa_to_lora_format(self):
+
+        with open(Paths.QA_DATASET, "r", encoding="utf-8") as fin, open(
+            Paths.QA_LORA_DATASET, "w", encoding="utf-8"
+        ) as fout:
+
+            for line in fin:
+                s = json.loads(line)
+
+                instruction = (
+                    "Ответь на вопрос строго на основе приведённого контекста. "
+                    "Если информации недостаточно — напиши: Недостаточно данных."
+                )
+
+                input_text = f"Контекст:\n{s['contexts']}\n\nВопрос:\n{s['question']}"
+                output_text = s["answer"]
+
+                fout.write(
+                    json.dumps(
+                        {"instruction": instruction, "input": input_text, "output": output_text}, ensure_ascii=False
+                    )
+                    + "\n"
+                )
+
 
 if __name__ == "__main__":
     builder = QADatasetBuilder()
     builder.build(num_samples=1500)
+    builder.qa_to_lora_format()
