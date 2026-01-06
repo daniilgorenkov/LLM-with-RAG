@@ -3,6 +3,10 @@ import os
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from utils.custom_logger import set_logger
+from config import Paths
+
+logger = set_logger(Paths.LOG_FILE)
 
 
 class EmbeddingBuilder:
@@ -46,7 +50,7 @@ class EmbeddingBuilder:
 
         for fname in files:
             path = os.path.join(chunks_dir, fname)
-            print(f"Embedding: {fname}")
+            logger.debug(f"Embedding: {fname}")
 
             with open(path, "r", encoding="utf-8") as f:
                 for line in f:
@@ -54,7 +58,7 @@ class EmbeddingBuilder:
                     all_texts.append("passage: " + obj["text"])
                     all_metadatas.append(obj["metadata"])
 
-        print(f"Total chunks: {len(all_texts)}")
+        logger.debug(f"Total chunks: {len(all_texts)}")
 
         embeddings = self.model.encode(
             all_texts,

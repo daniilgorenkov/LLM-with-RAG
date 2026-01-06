@@ -1,41 +1,139 @@
 import os
 import re
-from openai import OpenAI
+from config import CommonConfig, Paths
+from openai import OpenAI, RateLimitError
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+from utils.custom_logger import set_logger
+
+logger = set_logger(Paths.LOG_FILE)
 
 
 class LLMClient:
-    def __init__(self, model="gpt-4o-mini"):
-        from dotenv import load_dotenv
+    def __init__(self, model="gpt-4o-mini", online: bool = True):
 
-        load_dotenv("secret.env")
-        self.client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
-        self.model = model
+        self.online = online
+        logger.debug(f"Online: {self.online}")
+        if not self.online:
+            self.tokenizer, self.model = self._load_offline_model()
+        else:
+            from dotenv import load_dotenv
+
+            load_dotenv("secret.env")
+            self.client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
+            self.model = model
+
+    def _load_offline_model(self):
+        model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", dtype=torch.float16)
+        return self.tokenizer, self.model
+
+    def _check_model_status(self):
+        try:
+            answer = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": "Напиши краткое описание (примерно 250–300 слов) "
+                        "истории развития железнодорожного транспорта в Европе с 19 века до наших дней.",
+                    }
+                ],
+                temperature=0.2,
+                max_tokens=300,
+            )
+            if answer:
+                return True
+        except RateLimitError as e:
+            logger.debug(f"Rate limit exceeded for openai model {self.model}, swithing to local model.")
+            return False
+
+    def _generate_offline(self, messages: list):
+        prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(CommonConfig.DEVICE)
+
+        outputs = self.model.generate(
+            **inputs,
+            max_new_tokens=300,
+            temperature=0.2,
+            do_sample=True,
+            eos_token_id=self.tokenizer.eos_token_id,
+            pad_token_id=self.tokenizer.pad_token_id,
+        )
+        return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     def generate(self, messages: list) -> str:
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=0.1,
-        )
-        return response.choices[0].message.content
+        if self.online:
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    temperature=0.1,
+                )
+                return response.choices[0].message.content.strip()
+            except RateLimitError as e:
+                logger.debug(f"Rate limit exceeded for openai model {self.model}, swithing to local model.")
+                self.online = False
+                self.tokenizer, self.model = self._load_offline_model()
+                return self._generate_offline(messages)
+        else:
+            return self._generate_offline(messages)
 
-    def ask_direct_llm(self, prompt: str):
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-            max_tokens=300,
-        )
+    @staticmethod
+    def format_llm_answer(raw_answer: str):
+        """
+        Надёжный парсер для разных стилей вывода Qwen
+        Возвращает dict или None
+        """
+        text = raw_answer.split("\nassistant\n")[-1]
 
-        text = response.choices[0].message.content.strip()
+        # Случай "Недостаточно данных"
+        if "недостаточно" in text.lower() and ("данных" in text.lower() or "информации" in text.lower()):
+            return {"question": "Недостаточно данных", "answer": "Недостаточно данных"}
 
-        if "Вопрос:" not in text or "Ответ:" not in text:
-            return None
+        # Удаляем возможное жирное форматирование
+        text = re.sub(r"\*\*|\*", "", text)
 
-        q = text.split("Вопрос:")[1].split("Ответ:")[0].strip()
-        a = text.split("Ответ:")[1].strip()
+        # Ищем вопрос и ответ по разным шаблонам
+        patterns = [
+            r"Вопрос:\s*(.+?)(?:\n\n?Ответ:|\nОтвет:|$)",
+            r"Технический вопрос:\s*(.+?)(?:\n\n?Ответ:|\nОтвет:|$)",
+            r"Вопрос\s*[:：]\s*(.+?)(?:\n\n?Ответ\s*[:：]|\nОтвет\s*[:：]|$)",
+            r"Question\s*[:：]\s*(.+?)(?:\n\n?Answer\s*[:：]|\nAnswer\s*[:：]|$)",
+            r"Одно техническое задание\s*[:：]\s*(.+?)(?:\n\n?Ответ\s*[:：]|\Краткий ответ\s*[:：]|$)",
+            r"Одно техническое исследование\s*[:：]\s*(.+?)(?:\n\n?Ответ\s*[:：]|\Краткий ответ\s*[:：]|$)",
+            r"Одним из технических вопросов может быть\s*[:：]\s*(.+?)(?:\n\n?Ответ\s*[:：]|\Краткий ответ\s*[:：]|$)",
+            r"Одиночный технический вопрос\s*[:：]\s*(.+?)(?:\n\n?Ответ\s*[:：]|\Краткий ответ\s*[:：]|$)",
+        ]
 
-        if not q or not a:
-            return None
+        question = None
+        for pattern in patterns:
+            match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
+            if match:
+                question = match.group(1).strip()
+                # Ответ — всё после вопроса
+                answer_start = match.end()
+                answer = text[answer_start:].strip()
+                answer = re.sub(r"^Ответ\s*[:：]\s*", "", answer, flags=re.IGNORECASE).strip()
+                break
 
-        return {"question": q, "answer": a}
+        if question and answer:
+            return {"question": question, "answer": answer}
+
+        # Если ничего не нашли — возвращаем как есть (для отладки)
+        logger.warning(f"Не удалось распарсить ответ:\n{text}")
+        return None
+
+    def ask_direct_llm(self, prompt: str, formatted: bool = True):
+
+        messages = [{"role": "user", "content": prompt}]
+
+        text = self.generate(messages)
+
+        if formatted:
+            return self.format_llm_answer(text)
+        else:
+            return text

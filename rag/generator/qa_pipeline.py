@@ -3,7 +3,7 @@ from rag.context_builder.builder import ContextBuilder
 from rag.generator.prompt_builder import PromptBuilder
 from rag.generator.llm_client import LLMClient
 from rag.reranker.reranker import Reranker
-from config import Paths
+from config import Paths, LLMConfig
 import os
 
 
@@ -15,7 +15,7 @@ class RAGPipeline:
         self.reranker = Reranker()
         self.context_builder = ContextBuilder()
         self.prompt_builder = PromptBuilder()
-        self.llm = LLMClient()
+        self.llm = LLMClient(online=LLMConfig.ONLINE)
 
     def ask(self, question: str) -> str:
         # A — retrieve

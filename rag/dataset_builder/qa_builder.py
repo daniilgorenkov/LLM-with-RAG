@@ -6,44 +6,112 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 import json
 from collections import defaultdict
 import os
-from config import Paths
+from config import Paths, LLMConfig
+
 import random
+import re
 from rag.generator.llm_client import LLMClient
 from tqdm import tqdm
-import time
+from utils.custom_logger import set_logger
+
+logger = set_logger(Paths.LOG_FILE)
 
 
 class QADatasetBuilder:
 
+    OPEN_AI_ANSWER_RULES = """
+    Вопрос:
+    Недостаточно данных
+
+    Ответ:
+    Недостаточно данных
+
+    ФОРМАТ ОТВЕТА (строго, без пояснений):
+
+    Вопрос:
+    ...
+
+    Ответ:
+    ...
+    """
+
+    OFFLINE_LLM_ANSWER_RULES = """
+    На основе приведённого контекста сформулируй
+    ОДИН КОНКРЕТНЫЙ технический вопрос, ответ на который
+    ПРЯМО и ЯВНО содержится в тексте.
+
+    Запрещено:
+    - делать обобщения
+    - добавлять выводы
+    - использовать знания вне контекста
+    Вопрос и ответ пометь как "Вопрос:" и "Ответ:"
+    """
     PROMPT_TEMPLATE = """
-        Ты — эксперт в области диагностики дефектов поверхности катания железнодорожных колес.
+    Ты — эксперт в области диагностики дефектов поверхности катания железнодорожных колес.
 
-        На основе приведённого контекста:
-        - Сформулируй ОДИН технический вопрос.
-        - Дай точный и краткий ответ.
-        - Используй ТОЛЬКО информацию из контекста.
-        - Если информации недостаточно, напиши "Недостаточно данных".
+    Сформулируй ОДИН технический вопрос и ОДИН краткий ответ
+    СТРОГО на основе приведённого контекста.
 
-        Верни результат СТРОГО в формате:
+    ЕСЛИ информации недостаточно, напиши:
 
-        Вопрос:
-        <текст вопроса>
+    {answer_rules}
 
-        Ответ:
-        <текст ответа>
+    Контекст:
+    {contexts}
+    """
 
-        Контекст:
-        {contexts}
-        """
-
-    N_SAMPLES: int = 3
+    N_SAMPLES: int = 2
+    MAX_CONTEXT_CHARS = 1200
 
     def __init__(
         self,
-        max_contexts: int = 5,
+        max_contexts: int = 3,
     ):
         self.max_contexts = max_contexts
-        self.llm_asker = LLMClient()
+        self.llm_asker = LLMClient(online=LLMConfig.ONLINE)
+
+    @staticmethod
+    def is_good_qa(question: str, answer: str, context: str) -> bool:
+        # 1. Пустые поля
+        if not question or not answer:
+            return False
+
+        q = question.strip()
+        a = answer.strip()
+        c = context.strip()
+
+        # 2. Слишком коротко / слишком длинно
+        if len(q) < 10:
+            return False
+
+        if len(a) < 10:
+            return False
+
+        # ответ не должен быть длиннее контекста
+        if len(a) > len(c) * 0.8:
+            return False
+
+        # 3. Ответ почти копия контекста
+        if a.lower() in c.lower():
+            return False
+
+        # 4. Признаки обрезки
+        if "..." in a:
+            return False
+
+        if re.search(r"[а-яa-z]{2,}$", a) is None:
+            # заканчивается странно
+            return False
+
+        # 5. Эвристика: хотя бы часть ответа есть в контексте
+        key_words = [w for w in re.findall(r"[а-яa-z]{5,}", a.lower())]
+
+        overlap = sum(1 for w in key_words if w in c.lower())
+
+        if overlap == 0:
+            return False
+
+        return True
 
     def load_chunks(self, path: str):
         chunks = []
@@ -58,25 +126,63 @@ class QADatasetBuilder:
             grouped[c["metadata"]["doc_id"]].append(c)
         return grouped
 
-    def build_samples(self, chunks: list):
+    def build_context(self, chunks):
+        texts = []
+        total_len = 0
+
+        for c in chunks:
+            text = c["text"].strip()
+            if total_len + len(text) > self.MAX_CONTEXT_CHARS:
+                break
+            texts.append(text)
+            total_len += len(text)
+
+        return "\n\n".join(texts)
+
+    def build_qa_samples(self, chunks: list):
         samples = []
 
         grouped = self.group_by_doc(chunks)
 
         for doc_id, doc_chunks in grouped.items():
-            random.shuffle(doc_chunks)
+            chunk_l = len(doc_chunks)
+            if chunk_l < self.max_contexts:
+                start_idx = 0
+            else:
+                start_idx = random.choice(range(chunk_l))
 
-            contexts = doc_chunks[: self.max_contexts]
-            texts = [c["text"] for c in contexts]
+            contexts = doc_chunks[start_idx : start_idx + self.max_contexts]
+            texts = self.build_context(contexts)
 
-            sample = {
-                "question": None,  # будет сгенерировано LLM
-                "answer": None,  # будет сгенерировано LLM
-                "contexts": texts,
-                "sources": [doc_id],
-            }
+            if LLMConfig.ONLINE:
+                prompt = self.PROMPT_TEMPLATE.format(answer_rules=self.OPEN_AI_ANSWER_RULES, contexts=texts)
+            else:
+                prompt = self.PROMPT_TEMPLATE.format(answer_rules=self.OFFLINE_LLM_ANSWER_RULES, contexts=texts)
 
-            samples.append(sample)
+            qa = self.llm_asker.ask_direct_llm(prompt)
+
+            if isinstance(qa, dict):
+                if not self.is_good_qa(qa["question"], qa["answer"], texts):
+                    continue
+
+                sample = {
+                    "question": qa["question"],
+                    "answer": qa["answer"],
+                    "contexts": texts,
+                    "sources": [doc_id],
+                }
+
+            elif qa is not None:
+                sample = {
+                    "text": qa,
+                    "contexts": texts,
+                    "sources": [doc_id],
+                }
+            else:
+                sample = None
+
+            if sample:
+                samples.append(sample)
 
         return samples
 
@@ -92,58 +198,16 @@ class QADatasetBuilder:
             for s in samples:
                 f.write(json.dumps(s, ensure_ascii=False) + "\n")
 
-    def generate_qa_from_llm(self):
-        samples = []
+    def build(self, num_samples: int = 100):
 
-        print("reading raw qa json")
-        chunk_file = os.path.join(Paths.DATA, "qa_dataset_raw.jsonl")
-        with open(chunk_file, "r", encoding="utf-8") as f:
-            chunks = [json.loads(line) for line in f]
-
-        print("Start grouping chunks to ask llm...")
-        for i in tqdm(range(0, len(chunks), self.N_SAMPLES), desc="Asking llm..."):
-            group = chunks[i : i + self.N_SAMPLES]
-            if len(group) < self.N_SAMPLES:
-                continue
-
-            contexts = "\n\n".join(c["contexts"][0] for c in group)
-            sources = group[0]["sources"]
-
-            prompt = self.PROMPT_TEMPLATE.format(contexts=contexts)
-            if i % 3 == 0:
-                time.sleep(30)
-
-            qa = self.llm_asker.ask_direct_llm(prompt)
-
-            if qa is None:
-                continue
-
-            samples.append(
-                {
-                    "question": qa["question"],
-                    "answer": qa["answer"],
-                    "contexts": [contexts],
-                    "sources": sources,
-                }
-            )
-        return samples
-
-    def build(self, num_samples: int = 1000):
-
-        for _ in tqdm(range(num_samples), desc="generating context and sources"):
+        for _ in tqdm(range(num_samples), desc="generating qa dataset"):
             chunks_list = os.listdir(Paths.CHUNKS)
             random_chunk = random.choice(chunks_list)
             sample_chunk = self.load_chunks(os.path.join(Paths.CHUNKS, random_chunk))
-            samples_raw = self.build_samples(sample_chunk)
-            self.save(samples_raw, os.path.join(Paths.DATA, "qa_dataset_raw.jsonl"))
-
-        samples = self.generate_qa_from_llm()
-        self.save(samples, os.path.join(Paths.DATA, "qa_dataset.jsonl"))
+            samples_raw = self.build_qa_samples(sample_chunk)
+            self.save(samples_raw, os.path.join(Paths.DATA, "qa_dataset.jsonl"))
 
 
 if __name__ == "__main__":
     builder = QADatasetBuilder()
-    # chunks = builder.load_chunks(os.path.join(Paths.CHUNKS, "ГОСТ 34759-2021.jsonl"))
-    # samples = builder.build_samples(chunks)
-    # builder.save(samples, "data/qa_dataset.jsonl")
-    builder.build(num_samples=100)
+    builder.build(num_samples=1500)
