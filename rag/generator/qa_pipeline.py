@@ -4,7 +4,7 @@ from rag.generator.prompt_builder import PromptBuilder
 from rag.generator.llm_client import LLMClient
 from rag.reranker.reranker import Reranker
 from rag.generator.local_lora_llm import LocalLoRALLM
-from config import Paths, LLMConfig
+from config import Paths
 import os
 
 
@@ -26,7 +26,7 @@ class RAGPipeline:
 
     def ask(self, question: str) -> str:
         # A — retrieve
-        results = self.retriever.search(question, top_k=5)
+        results = self.retriever.search(question, top_k=3)
 
         if not results or results[0]["score"] < 0.6:
             return "В источниках нет информации для ответа на данный вопрос."

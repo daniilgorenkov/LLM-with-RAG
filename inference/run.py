@@ -9,7 +9,7 @@ load_dotenv("secret.env")
 from rag.generator.qa_pipeline import RAGPipeline
 
 if __name__ == "__main__":
-    rag = RAGPipeline()
+    rag = RAGPipeline("local_lora")
 
     while True:
         question = input("\nВопрос: ")
