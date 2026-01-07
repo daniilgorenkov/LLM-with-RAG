@@ -61,7 +61,7 @@ class LocalLoRALLM:
         prompt += "<|assistant|>\n"
         return prompt
 
-    def generate(self, messages, max_new_tokens=256, max_context_tokens=4096):
+    def generate(self, messages, max_new_tokens=256):
         """
         messages: List[{"role": "system"|"user"|"assistant", "content": str}]
         """
@@ -77,11 +77,10 @@ class LocalLoRALLM:
             output = self.model.generate(
                 **inputs,
                 max_new_tokens=max_new_tokens,
-                max_length=max_context_tokens,
                 do_sample=True,
                 temperature=0.7,
                 top_p=0.9,
-                repetition_penalty=1.1,
+                repetition_penalty=1.5,
                 eos_token_id=self.tokenizer.eos_token_id,
             )
         generated_tokens = output[0][inputs.input_ids.shape[1] :]

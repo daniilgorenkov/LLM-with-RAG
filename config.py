@@ -14,6 +14,7 @@ class Paths:
     QA_DATASET = os.path.join(DATA, "qa_dataset.jsonl")
     QA_LORA_DATASET = os.path.join(DATA, f"qa_lora.jsonl")
     LORA_QWEEN = os.path.join(DATA, "lora_qween")
+    PHD = os.path.join(DATA, "phd")
 
 
 class PreprocessorConfig:
