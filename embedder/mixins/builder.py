@@ -4,7 +4,7 @@ import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from utils.custom_logger import set_logger
-from config import Paths
+from config import Paths, EmbedderConfig
 
 logger = set_logger(Paths.LOG_FILE)
 
@@ -12,7 +12,7 @@ logger = set_logger(Paths.LOG_FILE)
 class EmbeddingBuilder:
     def __init__(
         self,
-        model_name: str = "intfloat/multilingual-e5-base",
+        model_name: str = EmbedderConfig.BASE_MODEL,
         device: str = "cuda",
     ):
         self.model = SentenceTransformer(model_name, device=device)
@@ -32,7 +32,7 @@ class EmbeddingBuilder:
 
         embeddings = self.model.encode(
             texts,
-            batch_size=16,
+            batch_size=EmbedderConfig.BATCH_SIZE,
             show_progress_bar=True,
             normalize_embeddings=True,
         )
@@ -62,7 +62,7 @@ class EmbeddingBuilder:
 
         embeddings = self.model.encode(
             all_texts,
-            batch_size=16,
+            batch_size=EmbedderConfig.BATCH_SIZE,
             show_progress_bar=True,
             normalize_embeddings=True,
         )

@@ -23,8 +23,13 @@ class PreprocessorConfig:
     BAD_CHARS = ["\xad\n\n", "\x0c", "\n\n", "\xad", "�", "\u200b", "***f***"]
 
 
+class EmbedderConfig:
+    BASE_MODEL = "intfloat/multilingual-e5-base"
+    BATCH_SIZE = 16
+
+
 class LLMConfig:
-    ONLINE: bool = False
+    ONLINE: bool = True
     BASE_MODEL: str = "Qwen/Qwen2.5-1.5B-Instruct"
     LORA_PATH: str = Paths.LORA_QWEEN
 

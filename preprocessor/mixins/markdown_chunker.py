@@ -7,8 +7,8 @@ from typing import List, Dict
 class MarkdownChunker:
     def __init__(
         self,
-        max_chars: int = 1200,
-        overlap: int = 200,
+        max_chars: int = 700,
+        overlap: int = 180,
     ):
         self.max_chars = max_chars
         self.overlap = overlap
@@ -78,40 +78,78 @@ class MarkdownChunker:
         return sections
 
     def chunk_text(self, text: str) -> List[str]:
-        """
-        Делит текст на чанки с overlap
-        """
         chunks = []
         start = 0
-        text_len = len(text)
+        n = len(text)
 
-        while start < text_len:
-            end = start + self.max_chars
-            chunk = text[start:end]
-            chunks.append(chunk.strip())
+        MAX_CHUNK = self.max_chars
+        OVERLAP = self.overlap
+        MIN_ADVANCE = max(200, int(MAX_CHUNK * 0.65))  # ← самое важное
 
-            if end >= text_len:
+        iteration = 0
+        MAX_ITERATIONS = n // 100 + 1000  # страховка от бесконечного цикла
+
+        while start < n:
+            iteration += 1
+            if iteration > MAX_ITERATIONS:
+                print("!!! Emergency break in chunk_text - too many iterations !!!")
                 break
 
-            start = end - self.overlap
+            end = min(start + MAX_CHUNK, n)
+
+            # Ищем границу предложения в зоне lookback
+            lookback = max(60, MAX_CHUNK // 8)
+            search_from = max(start, end - lookback)
+
+            boundary = end
+            for i in range(end - 1, search_from - 1, -1):
+                if text[i] in ".!?":
+                    # минимальная проверка на нормальное окончание предложения
+                    if i + 2 < n and (text[i + 1].isspace() or text[i + 1] in "\n\r"):
+                        boundary = i + 1
+                        break
+
+            # Самое важное — НЕ ДАЁМ продвижению стать слишком маленьким
+            if boundary - start < MIN_ADVANCE:
+                boundary = start + MIN_ADVANCE
+                if boundary > n:
+                    boundary = n
+
+            chunk = text[start:boundary].rstrip()
+
+            if len(chunk) >= 220:
+                chunks.append(chunk)
+
+            # Следующий старт — с гарантированным перекрытием
+            start = boundary - OVERLAP
+
+            # Дополнительная защита от "отката назад" или стагнации
+            if start < boundary - OVERLAP + 40:
+                start = boundary - OVERLAP + 40
 
         return chunks
 
     def chunk(self, text: str, doc_id: str, metadata: Dict) -> List[Dict]:
-        """
-        Главный метод
-        """
         sections = self.split_by_headers(text)
         documents = []
 
         for sec in sections:
             section_text = "\n".join(sec["content"]).strip()
-            if not section_text:
+            if len(section_text) < 150:
                 continue
 
             chunks = self.chunk_text(section_text)
 
             for i, chunk in enumerate(chunks):
+                # Финальная фильтрация
+                if len(chunk) < 220:
+                    continue
+
+                # Слишком много формул / символов — пропускаем
+                formula_ratio = sum(c in "=⋅∑εσλμ√^_∈∀∃" for c in chunk) / max(1, len(chunk))
+                if formula_ratio > 0.12:
+                    continue
+
                 documents.append(
                     {
                         "text": chunk,
@@ -120,7 +158,7 @@ class MarkdownChunker:
                             "section": sec["header"],
                             "level": sec["level"],
                             "chunk_id": i,
-                            "text": section_text,
+                            # "text": section_text,  ← лучше убрать, занимает много места
                             **metadata,
                         },
                     }

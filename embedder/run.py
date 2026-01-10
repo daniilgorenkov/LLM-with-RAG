@@ -3,13 +3,13 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import Paths
+from config import Paths, CommonConfig
 from mixins.builder import EmbeddingBuilder
 
 
 class Embedder:
     def run(self):
-        builder = EmbeddingBuilder(device="cpu")  # или "cuda"
+        builder = EmbeddingBuilder(device=CommonConfig.DEVICE)  # или "cuda"
 
         # 1️⃣ загрузить все чанки из директории
         embeddings, metadatas = builder.build_embeddings_from_dir(chunks_dir=Paths.CHUNKS)

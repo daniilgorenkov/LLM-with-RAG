@@ -9,6 +9,7 @@ import os
 from config import Paths, LLMConfig
 
 import random
+import difflib
 import re
 from rag.generator.llm_client import LLMClient
 from tqdm import tqdm
@@ -41,10 +42,6 @@ class QADatasetBuilder:
     ОДИН КОНКРЕТНЫЙ технический вопрос, ответ на который
     ПРЯМО и ЯВНО содержится в тексте.
 
-    Запрещено:
-    - делать обобщения
-    - добавлять выводы
-    - использовать знания вне контекста
     Вопрос и ответ пометь как "Вопрос:" и "Ответ:"
     """
     PROMPT_TEMPLATE = """
@@ -52,6 +49,58 @@ class QADatasetBuilder:
 
     Сформулируй ОДИН технический вопрос и ОДИН краткий ответ
     СТРОГО на основе приведённого контекста.
+
+    Ключевые технические термины:
+    - дефект поверхности катания
+    - динамические напряжения
+    - колесная пара
+    - поверхность катания
+    - модель машинного обучения
+    - нейронная сеть
+    - ползун
+    - выщербина
+    - неравномерный прокат
+    - изношенный гребень
+    - рельсы
+    - тензометрические датчики
+    - вертикальная сила в системе колесо-рельс
+    - боковая сила в системе колесо-рельс
+
+    Допустимые типы вопросов:
+    - о числовых порогах и значениях
+    - о классификации дефектов
+    - о критериях принятия решения
+    - о параметрах измерения
+    - о ссылках на таблицы, нормы, стандарты
+
+    Запрещено НИ В КОЕМ СЛУЧАЕ начинать вопрос со слов:
+    какие, как, каким образом, каким, почему, зачем, в чём заключается, опиши, расскажи, объясни, в каких случаях
+
+    Разрешены только вопросы вида:
+    • Какое значение...?
+    • Каков порог...?
+    • При каком условии...?
+    • Какой интервал считается...?
+    • Чему равно максимально допустимое...?
+    • Как классифицируется дефект при ... ?
+    • Какой критерий используется для ... ?
+
+    Примеры правильных пар:
+
+    Вопрос: Какой интервал скорости является критическим для автоматической передачи данных?
+    Ответ: От 45 до 50 м/с
+
+    Вопрос: Какова предельная величина неравномерного проката для колес пассажирских вагонов?
+    Ответ: 0,5 мм
+
+    Вопрос: При каком значении вертикальной силы возникает риск выщербины?
+    Ответ: Более 120 кН
+
+    Вопрос: В каком документе указаны пороги вертикальной силы в системе колесо-рельс?
+    Ответ: ГОСТ 34759-2021
+
+    Вопрос: До какого значения вертикальной силы допускается эксплуатация колесной пары?
+    Ответ: До 350кН, согласно ГОСТ 34759-2021
 
     ЕСЛИ информации недостаточно, напиши:
 
@@ -95,14 +144,15 @@ class QADatasetBuilder:
         c = context.strip()
 
         # 2. Слишком коротко / слишком длинно
-        if len(q) < 10 or len(a) < 10:
+        if len(q) < 10 or len(a) < 5:
             return False
 
         if len(a) > len(c) * 0.8:
             return False
 
         # 3. Ответ почти копия контекста
-        if a.lower() in c.lower():
+        ratio = difflib.SequenceMatcher(None, a.lower(), c.lower()).ratio()
+        if ratio > 0.91 and len(a) / max(1, len(c)) > 0.75:
             return False
 
         # 4. Признаки обрезки
@@ -112,13 +162,23 @@ class QADatasetBuilder:
         if re.search(r"[а-яa-z]{2,}$", a) is None:
             return False
 
+        BAD_QUESTION_STARTS = [
+            "какие методы",
+            "как используются",
+            "какие системы",
+            "каким образом применяется",
+        ]
+
+        if any(q.lower().startswith(p) for p in BAD_QUESTION_STARTS):
+            return False
+
         # 5. Эвристика: хотя бы часть ответа есть в контексте
         answer_lemmas = self.lemmatize_words(a)
         context_lemmas = self.lemmatize_words(c)
 
         overlap = answer_lemmas.intersection(context_lemmas)
 
-        if len(overlap) == 0:
+        if len(overlap) < 2:
             return False
 
         return True
@@ -136,6 +196,10 @@ class QADatasetBuilder:
             grouped[c["metadata"]["doc_id"]].append(c)
         return grouped
 
+    def extarct_keywords(self, text: str, top_k=10):
+        lemmas = self.lemmatize_words(text)
+        return list(lemmas)[:top_k]
+
     def build_context(self, chunks):
         texts = []
         total_len = 0
@@ -149,6 +213,28 @@ class QADatasetBuilder:
 
         return "\n\n".join(texts)
 
+    def select_good_start_idx(self, doc_chunks, n_select=4):
+        scores = []
+        for i in range(len(doc_chunks)):
+            text = doc_chunks[i]["text"]
+            # Простая эвристика "ценности" чанка
+            num_score = len(re.findall(r"\d+[,.]?\d*", text)) * 3
+            key_score = sum(1 for kw in ["мм", "кН", "ГОСТ", "порог", "критическ", "допуск"] if kw in text.lower())
+            length_score = len(text) / 300
+            total = num_score + key_score + length_score
+            scores.append((total, i))
+
+        scores.sort(reverse=True)
+        good_indices = [idx for _, idx in scores[:n_select]]
+
+        if not good_indices:
+            return random.randint(0, len(doc_chunks) - self.max_contexts)
+
+        # Берём самый ценный и пытаемся взять соседние
+        best = good_indices[0]
+        start = max(0, best - random.randint(0, 2))
+        return start
+
     def build_qa_samples(self, chunks: list):
         samples = []
 
@@ -159,10 +245,12 @@ class QADatasetBuilder:
             if chunk_l < self.max_contexts:
                 start_idx = 0
             else:
-                start_idx = random.choice(range(chunk_l))
+                start_idx = self.select_good_start_idx(doc_chunks)
 
             contexts = doc_chunks[start_idx : start_idx + self.max_contexts]
             texts = self.build_context(contexts)
+            keywords = self.extarct_keywords(texts)
+            texts = "Ключевые технические термины:\n" + ", ".join(keywords) + "\n\n" + texts
 
             if LLMConfig.ONLINE:
                 prompt = self.PROMPT_TEMPLATE.format(answer_rules=self.OPEN_AI_ANSWER_RULES, contexts=texts)
@@ -171,8 +259,14 @@ class QADatasetBuilder:
 
             qa = self.llm_asker.ask_direct_llm(prompt)
 
+            if qa:
+                # del chineese chars
+                qa["question"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["question"])
+                qa["answer"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["answer"])
+
             if isinstance(qa, dict):
                 if not self.is_good_qa(qa["question"], qa["answer"], texts):
+                    logger.debug(f"Bad qa: question:{qa['question']}, answer: {qa['answer']}")
                     continue
 
                 sample = {
