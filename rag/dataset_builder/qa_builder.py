@@ -259,12 +259,11 @@ class QADatasetBuilder:
 
             qa = self.llm_asker.ask_direct_llm(prompt)
 
-            if qa:
+            if isinstance(qa, dict):
                 # del chineese chars
                 qa["question"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["question"])
                 qa["answer"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["answer"])
 
-            if isinstance(qa, dict):
                 if not self.is_good_qa(qa["question"], qa["answer"], texts):
                     logger.debug(f"Bad qa: question:{qa['question']}, answer: {qa['answer']}")
                     continue
