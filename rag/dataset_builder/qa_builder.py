@@ -10,6 +10,7 @@ import re
 from tqdm import tqdm
 from rag.generator.llm_client import LLMClient
 from config import Paths, LLMConfig
+from nltk.stem import PorterStemmer
 import pymorphy3
 from utils.custom_logger import set_logger
 
@@ -43,13 +44,11 @@ class QADatasetBuilder:
     """
 
     PROMPT_TEMPLATE = """
-    Ты — строгий эксперт в диагностике дефектов поверхности катания железнодорожных колес.
-    Отвечай ТОЛЬКО на русском языке, ТОЛЬКО кириллицей (кроме названий стандартов и аббревиатур).
-
+    Ты — эксперт по диагностике дефектов ж/д колёс.
+    Сформулируй **ровно один** вопрос и **ровно один** короткий ответ только из текста.
     СТРОГО СЛЕДУЙ ПРАВИЛАМ:
 
-    1. Сформулируй РОВНО ОДИН технический вопрос и ОДИН краткий ответ.
-    2. Вопрос ОБЯЗАТЕЛЬНО начинается с одного из вариантов:
+    1. Вопрос ОБЯЗАТЕЛЬНО начинается с одного из вариантов:
        • Какое значение...?
        • Каков порог...?
        • При каком значении...?
@@ -59,9 +58,9 @@ class QADatasetBuilder:
        • Согласно какому ГОСТ...?
        ЗАПРЕЩЕНО начинать с: какие, как, каким образом, почему, зачем, опиши, расскажи и т.п.
 
-    3. Ответ — максимум 1–2 предложения. Только факт из контекста.
-    4. Никогда не придумывай числа, пороги, названия документов — только то, что явно есть в тексте.
-    5. Если нужной информации нет — отвечай строго:
+    2. Ответ — максимум 1–2 предложения. Только факт из контекста.
+    3. Никогда не придумывай числа, пороги, названия документов — только то, что явно есть в тексте.
+    4. Если нужной информации нет — отвечай строго:
        Вопрос: Недостаточно данных
        Ответ: Недостаточно данных
 
@@ -76,6 +75,8 @@ class QADatasetBuilder:
     Вопрос: До какого значения допускается вертикальная сила в системе колесо-рельс?
     Ответ: До 350 кН, согласно ГОСТ 34759-2021.
 
+    НЕ ПРИДУМЫВАЙ НИЧЕГО!
+
     Контекст:
     {contexts}
     """
@@ -87,6 +88,7 @@ class QADatasetBuilder:
         self.max_contexts = max_contexts
         self.llm_asker = LLMClient(online=LLMConfig.ONLINE)
         self.morph = pymorphy3.MorphAnalyzer()
+        self.stemmer_en = PorterStemmer()
 
     def lemmatize_words(self, text: str):
         words = re.findall(r"[а-яa-z]{5,}", text.lower())
@@ -97,14 +99,23 @@ class QADatasetBuilder:
                 lemmas.add(lemma)
         return lemmas
 
+
+    def normalize_word(self, word: str) -> str:
+        """Нормализуем слово: русский → pymorphy, английский → PorterStemmer"""
+        if re.match(r"[а-я]+", word):
+            return self.morph.parse(word)[0].normal_form
+        else:
+            return self.stemmer_en.stem(word)
+
     def is_good_qa(self, question: str, answer: str, context: str) -> bool:
-        q = question.strip().lower()
+        q = question.strip()
         a = answer.strip()
+        c = context.strip()
 
         if not q or not a:
             return False
 
-        # Запрещаем "плохие" начала только если ответ длинный/обобщающий
+        # Запрещаем самые плохие "какие" только если ответ длинный
         bad_starts = [
             "какие методы",
             "какие технологии",
@@ -115,25 +126,32 @@ class QADatasetBuilder:
             "какие факторы",
         ]
 
-        if any(q.startswith(b) for b in bad_starts) and len(a.split()) > 15:
-            return False  # отсекаем только если ответ слишком длинный
+        if any(q.lower().startswith(b) for b in bad_starts) and len(a.split()) > 15:
+            return False
 
-        # Разрешаем "какие значения", "какие пороги", "какие единицы" и т.п.
-        good_starts = ["какие значения", "какие пороги", "какие единицы", "какие документы", "какие размеры"]
-        if any(q.startswith(b) for b in good_starts):
-            # Дополнительно проверяем, что ответ содержит число/единицу/ГОСТ
-            if re.search(r"\d|мм|кн|гост|м|кгс|нм", a.lower()):
+        # НОВАЯ ПРОВЕРКА: пересечение нормализованных слов
+        # Регулярка ловит слова/термины (кириллица + латиница + цифры + дефисы)
+        context_words = re.findall(r"[а-яa-z0-9-]{3,}", c.lower())
+        answer_words = re.findall(r"[а-яa-z0-9-]{3,}", a.lower())
+
+        # Нормализуем
+        context_norm = {self.normalize_word(w) for w in context_words}
+        answer_norm = {self.normalize_word(w) for w in answer_words}
+
+        common = context_norm & answer_norm
+
+        # Минимум 2 общих нормализованных слова — достаточно для "релевантности"
+        if len(common) >= 2:
+            return True
+
+        # Дополнительно разрешаем, если в ответе есть число/единица/ГОСТ (даже без 2 слов)
+        if re.search(r"\d|мм|кн|гост|м|кгс|нм|до|от|не более|section|figure|table", a.lower()):
+            if len(common) >= 1:  # хотя бы одно слово
                 return True
 
-        # Остальные правила (краткость, отсутствие ...)
-        if "..." in a:
-            return False
-
-        if re.search(r"[а-яa-z]{2,}$", a) is None:
-            return False
-
-        # Если дошли сюда — пропускаем
-        return True
+        # Если ничего не нашли — отсекаем
+        logger.debug(f"Ответ оторван от контекста. Общих нормализованных слов: {len(common)}")
+        return False
 
     def load_chunks(self, path: str):
         chunks = []
@@ -251,12 +269,6 @@ class QADatasetBuilder:
                 "Чему равен порог {topic}?",
             ]
 
-            # В build_qa_samples перед формированием промпта:
-            template = random.choice(QUESTION_TEMPLATES).format(
-                topic="порог вертикальной силы / неравномерного проката"
-            )
-            texts = f"Предпочтительный шаблон вопроса: {template}\n\n" + texts
-
             if LLMConfig.ONLINE:
                 prompt = self.PROMPT_TEMPLATE.format(answer_rules=self.OPEN_AI_ANSWER_RULES, contexts=full_text)
             else:
@@ -266,6 +278,8 @@ class QADatasetBuilder:
 
             # Убираем китайские иероглифы сразу
             if isinstance(qa, dict):
+                if qa["question"] == "Недостаточно данных" or qa["answer"] == "Недостаточно данных":
+                    continue 
                 qa["question"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["question"].strip())
                 qa["answer"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["answer"].strip())
 
@@ -346,5 +360,5 @@ class QADatasetBuilder:
 
 if __name__ == "__main__":
     builder = QADatasetBuilder()
-    builder.build(num_samples=50)  # можно сразу больше для теста
+    builder.build(num_samples=500)  # можно сразу больше для теста
     builder.qa_to_lora_format()

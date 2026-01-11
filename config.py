@@ -32,7 +32,7 @@ class EmbedderConfig:
 
 class LLMConfig:
     ONLINE: bool = True
-    BASE_MODEL: str = "Qwen/Qwen2.5-1.5B-Instruct"
+    BASE_MODEL = "Qwen/Qwen2.5-7B-Instruct"
     LORA_PATH: str = Paths.LORA_QWEEN
 
 

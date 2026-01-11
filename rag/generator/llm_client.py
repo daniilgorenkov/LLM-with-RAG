@@ -57,7 +57,9 @@ class LLMClient:
         outputs = self.model.generate(
             **inputs,
             max_new_tokens=300,
-            temperature=0.2,
+            temperature=0.15,
+            top_p=0.8,
+            top_k=30,
             do_sample=True,
             eos_token_id=self.tokenizer.eos_token_id,
             pad_token_id=self.tokenizer.pad_token_id,
