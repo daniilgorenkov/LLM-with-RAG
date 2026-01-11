@@ -7,6 +7,8 @@ class Paths:
     DATA = os.path.join(WORKDIR, "data")
     RAW_DOCS = os.path.join(DATA, "raw_docs")
     CHUNKS = os.path.join(DATA, "chunks")
+    MD_DOCS = os.path.join(DATA, "md_docs")
+    METADATA = os.path.join(DATA, "metadata")
     CLEAN_DOCS = os.path.join(DATA, "clean_docs")
     REFERENCES = os.path.join(DATA, "references")
     VECTORS = os.path.join(DATA, "vectors")

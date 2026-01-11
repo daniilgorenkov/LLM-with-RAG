@@ -48,12 +48,8 @@ class TextCleaner:
         return metadata
 
     def cleanup_markdown_artifacts(self, text: str) -> str:
-        # _text_ → text
-        text = re.sub(r"_([^_]+)_", r"\1", text)
-
-        # лишние одиночные _
-        text = re.sub(r"_+", "", text)
-
+        # _text_ → text (markdown emphasis)
+        text = re.sub(r"(?<!\w)_([^_]+)_(?!\w)", r"\1", text)
         return text
 
     def remove_latex_commands(self, text: str) -> str:
@@ -83,7 +79,8 @@ class TextCleaner:
         return text
 
     def remove_front_matter(self, text: str) -> str:
-        return re.sub(r"^.*?(abstract|introduction)\b", r"\1", text, flags=re.I | re.S)
+        # только если реально в начале документа
+        return re.sub(r"^(?:\s{0,200})(abstract|introduction)\b", r"\1", text, flags=re.I)
 
     def remove_repeated_math_tokens(self, text: str) -> str:
         return re.sub(r"(\*\*?[a-zA-Z]\*\*\s*[ij]){3,}", "[BROKEN_FORMULA]", text)
@@ -105,7 +102,7 @@ class TextCleaner:
         return text
 
     def remove_lonely_math_lines(self, text: str) -> str:
-        return re.sub(r"^\s*[-=+*/()\[\]0-9a-zA-Z\s]{5,}\s*$", "", text, flags=re.M)
+        return re.sub(r"^\s*[=+*/()\[\]^]{5,}\s*$", "", text, flags=re.M)
 
     def normalize_markdown_tables(self, text: str) -> str:
         """
@@ -158,27 +155,58 @@ class TextCleaner:
 
         return text, None
 
+    def remove_html_artifacts(self, text: str) -> str:
+        # 1. Удаляем script и style целиком
+        text = re.sub(r"<(script|style)[^>]*>.*?</\1>", "", text, flags=re.I | re.S)
+
+        # 2. Заменяем <br> и <p> на переносы строк
+        text = re.sub(r"<\s*(br|p)\s*/?\s*>", "\n", text, flags=re.I)
+
+        # 3. Удаляем все остальные теги, но сохраняем текст
+        text = re.sub(r"<[^>]+>", "", text)
+
+        # 4. HTML entities
+        html_entities = {
+            "&nbsp;": " ",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&amp;": "&",
+            "&quot;": '"',
+            "&#39;": "'",
+        }
+
+        for k, v in html_entities.items():
+            text = text.replace(k, v)
+
+        return text
+
     def clean_text(self, text: str):
         text = self.cleaner.clean_markdown_string(text)
+        text = self.remove_html_artifacts(text)
         metadata = self.extract_metadata(text)
+
         text = self.normalize_markdown_tables(text)
         text = self.replace_display_formulas(text)
         text = self.replace_inline_formulas(text)
+
         text = self.remove_latex_commands(text)
+        text = self.fix_scientific_notation(text)
+
         text = self.normalize_newlines(text)
         text = self.cleanup_markdown_artifacts(text)
-        text = self.fix_scientific_notation(text)
-        text = self.replace_broken_formulas(text)
-        text = self.normalize_tables(text)
+
         text = self.remove_bad_chars(text)
-        text = self.remove_front_matter(text)
+        text = self.remove_garbled_lines(text)
+
         text = self.remove_repeated_math_tokens(text)
         text = self.remove_strikethrough(text)
-        text = self.remove_garbled_lines(text)
+
         text = self.remove_lonely_math_lines(text)
 
-        # убрать дубли формул
+        # финальная нормализация формул
         text = re.sub(r"(?:\[FORMULA\]\s*){2,}", self.FORMULA_TOKEN, text)
+
+        text = self.remove_front_matter(text)
 
         main_text, references = self.split_references(text)
         return main_text, references, metadata

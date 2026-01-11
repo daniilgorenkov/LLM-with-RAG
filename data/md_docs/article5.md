@@ -1,0 +1,346 @@
+ROLLING STOCK VIBRATION DIAGNOSTICS EXPERIENCE ON RUSSIAN RAILWAYS. 
+
+**==> picture [229 x 56] intentionally omitted <==**
+
+## **Introduction.** 
+
+One of the main issues of the railway safety are condition monitoring, condition prediction and diagnostics of the rolling stock parts and mechanisms. The strictest requirements on safety and faultless operation are set for the running gear of the railway rolling stock as it is not possible to take out of service most of its parts when fault develops during train movement. 
+
+The most important units of the running gear of the railway rolling stock that fail most frequently are wheel pairs and its box bearings. In locomotives and motorized cars besides above mentioned units we should consider other units with friction such as bearings of wheels drive as well as gearwheels in the drive and brush-collector units of the drive electric motors. 
+
+Currently there do not exist any non destructive methods or tests that will insure faultless operation of all above mentioned units in the period between major repairs. The same is true for increasing quality of the repair works. The main reasons for this are deviations in the repair and installation technology requirements as well as overloads that occur during exploitation of the equipment, not ideal rail ways, frequent defects of lubrication systems due to loss of lubrication and contamination of lubrication. That is why the natural way for the main units of the rolling stock reliability increase is condition monitoring during operation of the rolling gear. Such monitoring is done during intermittent maintenance and minor repairs of the rolling gear using visual and test methods of non destructive testing including those requiring partial disassembly of the units as well as functional diagnostics methods that are applied on the working equipment. 
+
+It is very inefficient to monitor the condition of the units, mainly rolling bearings, by their partial disassembly during intermittent maintenance and minor repairs of the equipment as there can be up to several dozens of such maintenances between major repairs of the rolling. Besides is it most common to introduce several new defects in the bearing during its disassemble and or installation. The development speed for such defects can be rather high causing bearing failure before the next maintenance. This is the reason to include the functional diagnostics of the rolling bearings in the list of tasks during maintenance (minor repairs) of the running gear. 
+
+There are two most efficient functional diagnostics methods for rolling bearings defect detection. 
+
+These are vibration analysis (for incipient and developing defects detection) ant thermal (detection of near failure condition of the bearing during its normal operation conditions). When we consider use of functional diagnostics methods applied to the running gear of the railway cars and wagons the most efficient way is to combine vibration methods for the diagnostics of rolling bearings on special stands for rotation of wheel pairs during final checks in the repair tasks and thermal monitoring of the box bearings in motion of the train. Possibility to detect the near to failure condition of the rolling stock box bearings by infrared emission is defined by the possibility to install the infrared sensors in the direct vision along side of the railway. 
+
+Totally different situation occurs when we talk about the locomotives and motor cars diagnostic tasks for the units with friction i.e. wheel-motor and wheel-gear cartridges (WMC and WGC). Side along thermal methods for the diagnostics of roller bearings are applicable only for the box bearings, other bearings are hidden from the means of measurements used for such a method. Two approaches are used in this task – main running gear units continuous condition monitoring by the means of the on-board condition monitoring systems and intermittent condition diagnostics and long-term condition prediction by portable diagnostic systems during maintenance and minor repair operations. In the latter case the long term condition prediction should be for time intervals longer that intervals between intermittent diagnostic operations. 
+
+Functional diagnostic methods for WMC and WGC of locomotives and motor cars are being introduces for decades, many locomotive depots are equipped with the means for rolling bearings intermittent diagnostics. But significant results in the decrease of quantity and quality of locomotive’s running gear failures were achieved just recently. The problems that occur in the adaptation of the existing condition diagnostics methods and instruments to railway practical tasks of locomotive’s WMC and WGC are described in the article along with the ways of their solution. Besides the main directions of prospective methods for detailed diagnostics of railway rolling stock are discussed. 
+
+## **1. Vibration methods of locomotive running gear diagnostics peculiarities.** 
+
+Till 1990s experts in vibroacoustical methods for locomotive’s running gear diagnostics had no instruments for detailed noise and vibration analysis and mostly relayed on simple measurements results their own experience. Noise and vibration were observed and monitored during rotation of the wheel pair within the cartridge with two WMC (WGC) when the locomotive was lifted on the jigs within maintenance of TO-3 (technical maintenance of the third class) or current repair TR-1 that are scheduled each 20-30 thousand km of locomotive operation. The wheels are rotated from their own motors, low frequency vibration is monitored by the stethoscope and medium frequency vibration by noise of the rotating unit. Besides, the visual inspection of the unit was done along with the analysis of self sustained oscillations excited with a simple hammer on the body of the unit. Sometimes the frequency analyses and amplitude decrease rate for self sustained oscillations was done. In some locomotive depots they used instruments for ultrasonic rolling bearings vibration measurements (transforming ultrasonic vibration to medium frequency domain). Such methods allowed experienced experts effective detection of bearings with defects symptoms. After that bearings were dismounted, disassembled and inspected visually and when needed checked with magnetic and acoustic defectoscopy methods. 
+
+In the end of the previous century most locomotive depots obtained instruments for condition diagnostics by vibration analysis that was widely used in other industries. Such instrumentation was applied for condition diagnostics of WMC bearings on special stands. But the diagnostics results were not that reliable as in other industries where the diagnostics were conducted on the machines operating in normal conditions. Designers of the measurement instrumentation were forced to find out the reasons of diagnostics reliability problems. Also the task for on-board locomotive diagnostics system was raised. 
+
+Association VAST, Ltd. is one of the main suppliers of vibration diagnostic systems for the locomotive depots of the Russian Railways. It specializes in rotation equipment detailed condition diagnostics and long term condition prediction. Association VAST, Ltd. experts analyzed existing efficiency limitations for the rolling bearings diagnostic systems used in locomotive depots. The followings works have been done within this task: 
+
+
+- Study of the defect development peculiarities in the bearings of transport means, 
+
+
+- Study of the stands and drives peculiarities influence on the vibration of diagnostic objects, 
+
+
+- Study of the special operation modes of the machines influence on the rolling bearings diagnostic symptoms, 
+
+
+- Diagnostic methods optimization for rolling bearings on transport means on different stages of defects development. 
+
+The results of these studies occurred to be unpredictable to great extent and led to significant changes in the design of the measurement instrumentation and software programs for the diagnostics of railway rolling stock. 
+
+The main defect development peculiarities that led to changes in the existing algorithms of diagnostics are: 
+
+
+- Unknown service life of rolling bearing elements. No one knows the service life of elements in the bearing to be replaced, 
+
+
+- Presence of shocks in the bearing during normal operation. The shocks come from rail joints and irregularities of the wheels and rails. Some times such shocks lead to changes in mechanical properties of the rolling surfaces of the bearings, 
+
+
+• Frequent starting modes of WMC operation. Such modes of operation often lead to rapid development of a number of bearing defects, namely bearing installation defects. Thus the WMC bearings defect development rate can greatly exceed the one used in the long term condition prediction methods proved in the other industries as well as auxiliary equipment of the locomotives. Besides, there can be no defectless stage in the WMC bearings of the locomotive that normally follow the run-in stage of bearing life. Reason for it is that the bearings are frequently disassembled and assembled from the used elements with unknown service life. It is a real problems as in the standard diagnostic and condition prediction algorithms defects found on the defectless stage of bearing operation are considered to be incipient and are not taken into account in the condition prediction and safe operation time forecast. For this reason we recommend to decrease the WMC and WGC safe operation time forecast done on the basis of vibration condition diagnostics compared to the standard one for the bearings of stationary installations of typical rotation machinery. 
+
+The following types of stands can be used for condition diagnostics of WMC (WGC) units in case of measurement instrumentation availability: 
+
+
+- stand including jigs for lifting wheel cartridges or the whole locomotive and power supply for drive motors during diagnostic measurements, 
+
+
+- roller stand, when wheel cartridge or the whole locomotive can be installed on the rollers and rolled have drives to rotate the wheels that have static load during measurements., 
+
+
+- stand to rotate locomotive wheel pair in its own bearings during measurements. The torque can be applied through the large gearwheel from the stand drive to the wheel pair, 
+
+
+- stand for drive motor rotation in its own supports with special installation applying load or without load. 
+
+The first two stands allow diagnostics during maintenance operations for locomotive without disassembly, the last two are usually used in the repair shops and diagnostics is done during repair operations. Rolling bearing diagnostics prior to installation is typically done on special stands for bearing rotation. All of these types of stands have their own peculiarities that should be taken into account during diagnostic process and in the software for automatic diagnostics as well. The most changes in diagnostic methods are required during rolling bearing diagnostics in WMC and WGC under locomotive. 
+
+It is essential to choose the right rotation speed for the diagnostics of the of the box bearings when the locomotive is lifted on the jigs. The reason for it is definite requirement for reliable vibration diagnostics methods application to apply during diagnostic measurements static load to the points in the bearing where the operational defects develop. Load is reversed in the lifted wheel pair causing possible incorrect information about the outer race condition. To eliminate such a situation the rotation speed of the wheel should assure that the centrifugal force on the rolling elements will exceed its weight and the rollers will provide reasonable load on the outer race by its centrifugal force. In the same time the rotation speed should be slow enough so that the residual unbalance centrifugal force of the wheel pair will be significantly lower than its weight. Then there will be no additional shock loads in the bearing with possible high clearances. Such shock loads will not allow reliable condition diagnostics by vibration methods. The experience shows that the optimal rotation speed for diagnostics of locomotive box bearings is with in the range of 240-300 rpm of wheel pair rotation. 
+
+On roller stands the static load on the box bearings is optimal for the condition diagnostics, but the problems originate is periodic shock loads from the rollers of the stand and wheels that influence on the parts of the WMC vibration. The sources of these shocks are kinematic forces between rollers and wheels rolling surfaces and their uneven natural wear. Shock loads from the uncircularity of the rolling surfaces of the diagnosed wheel pair are so high that it excites vibration that may significantly prevail on the bearing vibration in WMC rolling bearings. It makes nearly impossible 
+
+to detect the bearing defects especially on the incipient stage of their development. As for the loads caused by the uncircularity of the stand rollers their frequencies significantly differ from the bearing frequencies and rotation speed of the wheel pair and while the roller defects are not so high it is possible to separate stand rollers defects and bearing defects during the condition diagnostics process. 
+
+Similar situation can be observed when the bearings are diagnosed by the on-board condition diagnostic systems of the locomotive. The discussed shock loads occur due to the possible uncircularity of the wheels and uneven rails, including gaps in the joints. 
+
+These problems can be also observed on the diagnostic stands of the repair shops. In this case stand drive vibration goes to the diagnosed unit. The drive of the stand rotates the diagnosed bearing and any defects in design, manufacturing, or operation of the drive results in the increased vibration that is transmitted from the drive to the bearing together with the torque trough mechanic, hydrodynamic or magnetic coupling. Besides static or dynamic loads can be generated that prevent reliable diagnostics. That’s why we consider diagnostics of the lifted locomotive to be the most reliable technique. In this case no external drives are involved and the wheels rotate from their own drive motor. In the repair shops the best results of bearing diagnostics were obtained on stands allowing measurements during free run-out of the bearing. The drive motor bearings diagnostics is most reliable on a stand with the motor running with no load and even with no mechanical link to wheels or gearbox. It is essential that diagnostic methods should be adapted to all above discussed cases. 
+
+Additional peculiarities of the WMC and WGC condition diagnostics under locomotive were observed during conducted studies. The first one is eliminating influence of one WMC on the diagnostic symptoms of the other WMC installed in the same cartridge. The simplest way to do it is rotation of only one WMS during diagnostic measurements. The more complicated way is to rotate two WMS with different rotation speeds. The relationship of two rotation speed should be supported at several level and the diagnostic software should be adopted to this relationship. The second problem is low technological requirements to the gearbox quality (gearwheels interaction) in the WMC. There is no procedure of gearwheel pairs choice, gearwheels are taken random way, no requirements on the vibration and noise of gearbox exist. That is why the shock load during gearbox normal operation may be so high that it hides any bearing vibration. As a result standard methods for bearing diagnostics in gearboxes turn to be inefficient and require special adaptation to the case of WMC diagnostics. The third peculiarity is connected with possible rapid changes of temperature of the diagnosed bearing during measurement. Such changes can be significant and they should be definitely taken into account. Such situation is observed in two cases – when the temperature in the workshop differs significantly from the temperature of the locomotive and when there is no time gap from start of wheels rotation and measurements. The time gap that we recommend to observe is about 3-5 minutes at least. 
+
+## **2. Choice of methods for locomotive running gear condition diagnostics.** 
+
+Different types of defects develop in rolling element bearings during their service life. These defects may have different development rate and they may influence is different ways on the bearing operation. Nearly all types of defects have direct or indirect influence on oscillation forces and vibration within a bearing. This influence depends on type and development stage of defect as well as the construction of the bearing and its peculiarities. According to the influence of the defects on bearing, support or machine as a whole vibration we can distribute defects on the following groups: 
+
+
+- form deformation (uncircularity, different sizes of elements) of rolling surfaces, 
+
+
+- spalls, cracks on rolling surfaces, 
+
+
+- overload f rolling surfaces, 
+
+
+- lack or excess of lubrication, instability of lubrication layer, 
+
+
+- cage defects (wear, degradation) 
+
+
+- interaction of movable and static parts, 
+
+
+- slip of race. 
+
+Oscillation forces in a rolling bearing with defects rotating at constant rotation speed can be periodic, partially periodic, and randomly distributed in time. The period of these oscillation forces is defined by the following five main bearing frequencies and their combinations: 
+
+
+- Rotation speed of the rotor RPM, 
+
+**==> picture [481 x 37] intentionally omitted <==**
+
+**==> picture [414 x 106] intentionally omitted <==**
+
+> here RPM – rotation sped of the rotor; _[r]_ C - cage radius; _rrol_ - radius of rolling elements; α – contact angle between rolling elements and rolling surfaces, Z – number of rolling elements in one race. By the physical nature oscillation forces in the bearing with defects can be distributed among following groups: 
+
+
+- forces of kinematic origin. Occurs when two surfaces with form factor irregularities interact with static load, 
+
+
+- forces of parametric origin. Occur with relative movement of loaded surfaces in case when the rigidity of loaded surfaces change with rotation angle, 
+
+
+- forces with shock load origin. Occur with impacts of one rolling surface over another or with appearance of shock loads on one of rolling surfaces, 
+
+
+- friction forces in lubrication. 
+
+Diagnostic symptoms for defects developing in rolling bearings can be found by detection of changes in characteristics of existing oscillation forces in the bearing, or appearance of forces f different nature. On different stages of defect development the proportions of different nature fores in the bearings may change dramatically. That is why no single vibration diagnostic method exists that can be equally efficient in detection all types of defect on every development stage. 
+
+The most widely used methods are based on detection of shock forces and vibration. It can be methods of ultrasonic frequency range that analyze vibration excited on outer race by shocks of rolling elements passing through the lubrication layer. It can be methods based on detection and analysis of harmonic rows in spectra (cepstra) of medium frequency bearing vibration excited by shocks of rolling elements on uneven rolling surfaces. It can be methods based on the analysis of random high frequency bearing vibration excited by pressure pulsations in the lubrication layer and detection of pulse modulation symptoms in the vibration envelope. 
+
+Each of the above mentioned methods possess its own advantages and disadvantages, as well as difficulties in real life applications. One of the main advantages of any methods is a wide range of detected defects in the incipient stage of their development. The disadvantages of each method can be lack of sensitivity to certain defect types, for example all f the methods based on shock analysis are not sensitive to cage defects of rolling bearing. If we consider problems in application of the shock analysis methods we should mention difficulties in physical approach to certain bearings in some machines as well as separation of shock vibrations originated in the bearing defects and the one originated due to shock loads that come from the other machine parts, for example in the gearwheel interaction in the mechanical transmission. 
+
+A number of common rolling element bearings diagnostic methods are based on the analysis of low frequency vibration excited by the parametric and kinematic forces in the statically loaded bearings. Spectrum analysis of low frequency machine vibration often allows analysis of bearing vibration 
+
+components. Amplitudes and frequencies of bearing vibration components and their lower harmonics allows estimation of rolling surfaces deviation from the bearing design pattern, and the analysis of their modulation presents symptoms for rolling surfaces load deviation from the standard one. Methods based on the analysis of low frequency machine vibration are commonly used to detect the near to failure condition of the bearings and are applied together with lubrication monitoring systems for example by monitoring ultrasonic vibration of stationary bearing parts. But even in the later case such methods proved their efficiency only in case of continuous vibration monitoring. 
+
+Bearing diagnostics methods based on the vibration analysis of friction forces excited by hydrodynamic forces mainly in case of continuous lubrication layer are not that widely used despite all bearing defects influence the formation of these friction forces. The main reason for is that these methods are most sensitive to appearance of micro shocks in the bearing. The micro shocks are most easily detectable by ultrasound vibration analysis rather that using complicated methods pseudorandom friction vibration separation from numerous harmonic components with other origin in the bearing vibration signal. But only such a method allows detection not only of pulse modulation, but periodic modulation of friction forces as well. Thus it is possible to monitor the cage defects directly by analysis of friction forces between cage and rolling elements and identify most types of bearing defects on the initial stage of their development. Despite the sensitivity of such methods may decrease with the effects development they are irreplaceable in the long term bearing condition prediction tasks as such condition prediction can be reliable only in case of all possible defects detection in the initial stage of their development. 
+
+On the first stages of condition diagnostics of Association VAST introduction for the rolling 
+
+bearing diagnostics for locomotive rolling gear the standard systems were used. Two main methods were used in vibration diagnostics in these systems – autospectrum analysis of vibration acceleration measured on bearing housing in low and medium frequency domains and envelope analysis of vibration selected by band pass filter in high frequency domain. The first method was used for detection and development monitoring of bearing rolling surfaces and the second for detection and identification bearing rolling surfaces, cage and lubrication defects as well as overloads due to bearing or machine installation defects. 
+
+In most of industries the defect development goes smooth due to stable operation modes and load 
+
+and it allows reliable detection of all severe defects much before the dangerous situation may occur when such diagnostic systems are for periodic measurements at two or three months intervals. A different situation is observed in rolling bearings condition diagnostics of locomotive WMC and WGC as the defect development rate turned out to be several times higher. Reasons for such an effect can be following: installation of used rolling elements in the bearing, possible overload of drive motors, shock loads on wheel pairs and box bearings during locomotive operation, lubrication contamination with abrasive particle and consequent rapid bearing wear. Besides the bearing vibration analysis is significantly complicated by presence of shock pulses from gear transmission present in most of WMC and WGC due to very poor specifications on gearwheel teeth and assembly quality, in its turn it complicates several bearing’s defects identification.. 
+
+A number of changes were introduces in the portable condition diagnostics system Vector-2000 and 
+
+stand diagnostic system KPA-1V as a results of conducted investigation and many years experience of diagnostics in railway depots. Two additional condition diagnostics methods were introduced in the system – additional lubrication quality monitoring by ultrasound shock pulse power analysis exciting vibration at frequency range of 30-40 kHz, and near to failure condition detection by analysis of random low frequency vibration of WMC and WGC. Besides, additional algorithms for separation of bearing defects and gearwheels interaction defects were introduced in the automatic condition diagnostics software for rolling element bearings and gearboxes. It is essential in case when random gearwheels are selected during repair to work in pairs. 
+
+Now the following measurements are done for each bearing unit of WMC or WGC of a locomotive when locomotive is lifted on the jigs and the wheels are rotated at about 250 RPM: 
+
+
+• Autospectrum of bearing vibration measured in lower part of bearing shield in vertical direction, 
+
+
+- Envelope spectrum of high frequency (from 7 up to 9 kHz) of bearing vibration measured in the same point, 
+
+
+- Ultrasonic vibration level. 
+
+Fig 1 and 2 present examples of good and defective bearings of a wheel pair. 
+
+**==> picture [483 x 295] intentionally omitted <==**
+
+_Fig.1. Vibration spectra of a good bearing (up right), bearing with cavity on outer race (bottom right), envelope spectrum of high frequency random vibration components of the defective bearing (left)_ 
+
+_._ 
+
+Figure 2 presents changes in a high frequency vibration envelope spectrum of the bearing during two months period (from good condition up to development of a severe defect – spall on outer race). You can also see high frequency vibration overall levels measured in 10-25 kHz frequency band. 
+
+Automatic bearing condition diagnostics is done by joint vibration analysis of a big set of identical bearings of the same WMC (WGC) types. As a result all diagnostic symptoms of all possible defects are used to define levels separating sets of good and defective bearings. It allows determining of all bearings with condition different from a good one in automatic mode. To separate defective bearings into groups with different defect severities (incipient, medium, severe) each type defect levels are introduced in the software and an expert can edit them according to his experience in diagnostics. Incipient defects are those that have nearly no influence on condition prediction as their levels are not stable and they can disappear during machine maintenance or operation. Medium defects can not cause bearing failure during the time period significantly exceeding predictable safe operation time for the bearing. They are counted only in case of several simultaneously developing defects. Severe defects have direct influence on the bearing residual service life. That is why it is essential for the qualified expert in diagnostics to verify type of severe defect as well as a level separating severe and medium defects. It is done to maximize bearing usage and not to replace bearing that did not worked out its maximum service life limit. 
+
+## **3. Main practical results.** 
+
+A number of diagnostic systems by Association VAST and other companies are used in locomotive depots during last decade. Initially the efficiency of such systems defined by two errors: probability 
+
+of dangerous defect missing that led to bearing failure between TO-3 services that mostly include bearing diagnostics procedures, and probability of false alarms leading to additional maintenance or bearing replacement, did not exceeded the efficiency of an expert in diagnostics using just visual and audio methods. 
+
+**==> picture [482 x 258] intentionally omitted <==**
+
+_Fig.2. Envelope spectra of random high frequency vibration of good bearing measured on 14.06.2008, and the same bearing measured on 21.08.2008, after a cavity developed on outer race._ 
+
+Then most of diagnostic systems producers chose the way to increase the number of methods simultaneously used for bearing diagnostics. Efficiency of diagnostic system increased as well as the analysis of vibration became more complicated and more labor costly. In its turn it caused increase in time for one diagnosis and increased requirements for an expert qualification otherwise the efficiency of any modern diagnostic system is very low. There two problems turned out to be the main obstacles of further introduction of condition diagnostics techniques in Russian railway. To solve the problem it was suggested to use the automatic condition diagnostic systems with artificial intellect that have been used successfully in other industries by that time. In particular the DREAM condition monitoring and diagnostics software by Association VAST where the most time consuming operations in condition diagnostics by vibration is done by software. Automatic operations conducted by software include: 
+
+
+- Set up requirements and tasks for measurements of vibration autospectra, envelope spectra of high frequency vibration components and ultrasound overall levels, 
+
+
+- unload and storage of measurements results in the database, 
+
+
+- automatic processing of measurements results, rectifying diagnostic symptoms, and calculating values for diagnostic parameters., 
+
+
+- automatic calculation of levels for incipient, medium and severe defects by the group of randomly selected previous measurements from database by standard algorithms and algorithms edited by the operator, 
+
+
+- automatic comparison of all measured diagnostic parameters with calculated levels with further identification of all possible defect types and defect severity, 
+
+
+- automatic condition prediction for diagnosed unit in the form of save operation time till next measurement date or save operation time or in case of dangerous condition detected recommendations on maintenance and repair. 
+
+DREAM software also has ability for automatic adaptation to design and technological peculiarities of the diagnosed equipment as well as to operation peculiarities and operation modes during 
+
+diagnostic measurements. In particular in WMC and WGC automatic diagnostics DREAM analyses condition of bearings and gear transmission simultaneously taking into account peculiarities of typical poor quality of gear transmission and its influence on rolling bearing load and vibration. Operator of diagnostic system has to upload measurements route map to the measurement instrument, conduct measurements in all measurement points at specified rotation speed, download measurement data to computer and actual measurement speed during measurements, after that software automatically presents the most probable condition diagnostics and condition prediction for both bearing and gearbox. 
+
+The final decision on bearing condition for bearings with detected symptoms for defects is done by the expert in diagnostics. The task for an expert is verification of automatic diagnosis using automatic and additional analysis methods, and additional information if one is available. It should be done only for a few units with severe defects found. 
+
+A number of years for practical adaptation of Association VAST systems to condition diagnostics 
+
+and prediction on Russian railways allowed probability decrease for missing of dangerous defects leading to bearing failure during locomotive motion to the rate below 1/10000, that is proved by the documented results of diagnostic service work on Northern railway during the last year. At the same the probability of danger overestimation and false alarms in WMC and WGC rolling bearing diagnostics as a result of automatic diagnostics can be rather high and approach 3-5%. There can be two reasons for this; one is chosen algorithms for diagnostic data processing when the diagnosis is done by the most severe of possible scenarios of defect development, thus decreasing the probability of missing dangerous defect. Another reason can be influence on bearing vibration of low technological requirements on gearwheel pair selection and assembly quality. As the software provides operator with all intermediate results of diagnostics he can verify the condition diagnostic and prediction results using all available information including indirect one. For qualified operators it allows decrease of false alarms rate in more than ten times preserving the same extremely low rate for missing defect probability. 
+
+Optimum solution of three main tasks guaranties high efficiency in practical diagnostics. 
+
+First – each defect type should be detected with minimum two independent diagnostic symptoms. In systems of Association VAST is solved for bearing rolling surfaces using symptoms found in vibration autospectra (increase of kinematic and shock pulses vibration components) and in envelope spectra (modulation of friction forces). Cage detects are found by both friction forces vibration modulation and by modulation of bearing vibration. Lubrication defects by friction vibration increase and by ultrasound pulse vibration (micro shocks of rolling elements over the rolling surfaces when lubrication layer is locally destroyed). The most problems are connected with detection of such defect as slip of race. Despite of two independent methods are used for diagnostics– by shock pulses in the bearing and by short term increase of high frequency vibration, it is very probable that the race will not slip during diagnostic measurements as race most often slips when the machine start its rotation under high load but not during constant rotation. 
+
+The second task – additional diagnostic measurements within extended diagnostic program for 
+
+rolling element bearings with dangerous defect symptoms detected by automatic diagnostics. The number of such bearing units is rather small – typically 3-5 for the whole locomotive and extended diagnostic program is recommended for them, including measurements with reversed rotation direction and after adding lubrication for these units. Typically if the defects of rolling surfaces and cage are well developed the symptoms for defects will not vanish with lubrication adding and reversing of rotation direction and most of gearbox defects symptoms may change or disappear. The third task is using very highly qualified experts to make decisions in complicated doubtful cases and training experts in condition diagnostics. Doubtful cases most typically are those when well developed bearing defects symptoms coincide with incipient defect symptoms of their parts of WMC, for example gear transmission couplings and electromagnetic part of drive motors. As an example below we present diagnostic measurements data for two bearings. The automatic condition diagnostics is the same in both cases – cavities (spalls) on inner race of the bearing and gearwheel defect. But during visual inspection of dismounted bearing defect was found only in the first case 
+
+(see fig.3 - fig.5), in the second case the defect is rather typical – nonuniform wear of the small gear in the gear transmission (see. fig.6 - fig.9). The make the correct diagnostics an expert should use additional information and defect symptoms typical for WMC of the exact type. 
+
+**==> picture [483 x 295] intentionally omitted <==**
+
+_Fig.3. Autospectrum of bearing with crack on inner race (right) and envelope spectrum of its high frequency vibration components (left)_ 
+
+**==> picture [482 x 269] intentionally omitted <==**
+
+
+- _Fig.4. Envelope spectrum of random high frequency vibration components of a bearing with crack on inner race. Here RPM – rotation frequency of inner race, BPFI – ball pass frequency on inner race_ 
+
+**==> picture [436 x 244] intentionally omitted <==**
+
+_Fig.5. Part of envelope spectrum of random high frequency vibration components of a bearing with crack on inner race_ 
+
+Let us analyze the high frequency vibration components envelope spectrum for the bearing with cavity (spall) on the inner race. On the first glance you may see that only the rotation speed harmonics are present in the spectrum, in this case the defects of gearwheel will be the correct diagnosis. But if you look more precisely on the envelope spectrum fig 4 and use higher resolution like on fig.5 you may clearly distinguish two harmonic rows. One row is for rotation speed harmonics (gearwheel defect symptom) and another is the ball pass frequency on inner race harmonics modulated by rotation speed (symptom for cavity on inner race). On the high resolution spectrum you can clearly see that the rows are not the same and this is a very typical symptom for inner race defect. 
+
+**==> picture [483 x 295] intentionally omitted <==**
+
+_Fig.6. Vibration spectrum (right) and envelope spectrum of random high frequency vibration components of the second bearing (left)_ 
+
+Figure 6 presents vibration autospectrum (right) and high frequency vibration components envelope (left) for the second bearing for which the software in automatic mode of diagnostics also indicated symptoms for both defects – bearing inner race defect and gearwheel defect. 
+
+But precise envelope spectrum analysis shows (fig. 7) that one of the rotation speed harmonics was identified as the BPFI harmonic. 
+
+**==> picture [483 x 173] intentionally omitted <==**
+
+_Fig.7. Envelope spectrum of random high frequency vibration components of the second bearing_ 
+
+It can be even more clearly seen on high resolution part of the envelope spectrum on fig. 8 where you can see the BPFI and no increase of vibration on this frequency. 
+
+**==> picture [483 x 216] intentionally omitted <==**
+
+_Fig.8. Part of envelope spectrum of random high frequency vibration components of the second bearing with BPFI cursor_ . 
+
+The presented spectra and analysis clearly prove absence of cavity or spall on the inner race of the bearing and error in one of the diagnosis made in automatic mode of software operation. At the same time modulation of _kFz_ vibration components (gearmesh frequencies) by the rotation speed harmonics _kRPM_ in the vibration autospectrum of this bearing (see fig. 9) is a clear symptom for the second diagnosis made in automatic mode – gearwheel defect. 
+
+**==> picture [482 x 258] intentionally omitted <==**
+
+_Fig.9. Vibration spectrum of the second bearing_ 
+
+Besides, the situations occur when automatic diagnostic system detects changes in vibration of a WMC but can not detect the defect type as no reliable symptoms for defects are fount. In such a case the system reports non-identified defect and the final decision should be taken by the operator of diagnostic system and in some cases an assistance of diagnostic expert may be required. 
+
+The practical experience show that assistance of an expert in diagnostics is required not only in the above situations, but also it is very important to monitor from time to time the work of operators in field. Several types of errors may be done by operators – one is in interpretation of automatic diagnostics results as described above, another group of errors can be done during measurements in particular in rotation speed measurement and entry in the database. Analysis of randomly chosen results of diagnostics in the database allows finding systematic errors and helps to correct and avoid errors in future. 
+
+To attract experts to such a work Association VAST significantly redesigns the diagnostic systems including both hardware and software aiming to switch to corporate condition diagnostics systems. Such a system unites all the databases of diagnostic measurements and diagnosis by all experts in diagnostics who can be located in different cities and locations, but are connected with standard communication network. Nowadays such a system is introduces on the Northern railway and a group of experts can be used in diagnostic process analyzing data in real time in any depot when a doubtful situation occurs. As for training experts and operators of the diagnostic system, such work is done in two ways - in North-West educational center within Association VAST during several education sessions and trainings and according to individual plans in main job location by joint work with leading Association VAST experts in diagnostics who can access the corporate data base for condition diagnostics. 
+
+As an experiment in 2008 the experts from VAST-service diagnostic center within Association VAST took all the diagnostic works for Northern railway locomotives in 12 depots in different cities of Russia. 35 experts with different qualification work in the VAST-service diagnostic center. They conduct all works for vibration diagnostics of WMC for up to 1500 locomotives providing 300000 diagnosis a year. During the first year of such works up to 30 bearings per months were in condition requiring immediate replacement, but last year such a number decreased dramatically. Such decrease is observed due to systematic work in diagnostics of WMC both after repair works leading to significant decrease in installation defects as well as during operation of locomotive. As a result most of the bearings with low residual life due to installation or assembly defects are being 
+
+continuously replaced. At the same time the number of bearings with developing and dangerous defects due to normal operation is stable and is within the range of 0.5% a year. 
+
+The probability of errors in diagnostics can be very low if diagnostic service is properly organized, experts and operators continuously increase their qualification, and if it is possible to attract external experts for doubtful cases analysis. So, during the first year the diagnostic center of Northern railway continuously monitored the condition of 50 thousand bearings of running gear. About 250 bearings were detected to need immediate replacement. Bearings we dismounted and only one turned out to be in and acceptable for operation condition according to railway standards. Besides, two bearing units were approved for operation by mistake. Due to severe defects these bearings failed before the end of predicted safe operation period that was estimated as 25 thousand km. 
+
+## **4. Prospective for rolling stock functional diagnostic systems.** 
+
+A wide range of means and methods for nondestructive testing is used during repairs and periodic tests for condition monitoring and diagnostics in a number of industries and transport. In between repairs and tests, methods of functional diagnostics are used for condition monitoring and diagnostics that can be applied while machines and equipment are operating in normal mode and does not need to be either stopper or disassembled. The same methods are successfully applied during maintenance and commissioning of equipment. 
+
+The modern condition monitoring and functional diagnostics methods are based on machinery operation and secondary parameters measurements. Detailed condition diagnostics commonly use the methods and measurement instrumentation for recording and analysis of vibration, temperature, drive motor electric current, lubrication parameters, acoustic emission of equipment with static load. The systems designed for all applications mentioned above are produced in both portable and stationary design and can be applied for the condition monitoring and diagnostics of railway rolling stock. 
+
+In Russian railways the portable systems for functional diagnostics are most commonly used during maintenance and commissioning operations in locomotive depots. The main problems of such diagnostics are connected to special operating modes that are required for diagnostic objects. For this very reason, vibration diagnostic methods are the most commonly used. In most cases they do not require the nominal load on the machines. At the same time methods based on drive motor current analysis and IR imaging are delayed in wide introduction in depots. Though, the works on best methods selection and their introduction in repair and maintenance process are done rather intensively. All methods mentioned above are included as basic diagnostic methods in the corporate condition monitoring and diagnostic system designed by Association VAST. The system is being introduced in the Northern railway. In particular the works on introducing drive motor current analysis are done to assure diagnostics of drive motor by current while its bearings are diagnosed by vibration analysis. The works on introducing IR imaging are done for diagnostics during tests of the locomotive equipment in the modes of partial load as well as rheostat tests for locomotives. 
+
+We should specially emphasize the condition monitoring and diagnostics questions for rerunning gear of railway cars and wagons in between of their repair and periodic non destructive tests. The question was raised by a demand from railways to improve current situation when only IR emission is used to control the condition of cars and wagons box bearings by wayside IR detectors. The task for other methods development and implementation including vibration diagnostic method is stated. Within this problem a test was done on a roller stand for rotation of wheel pairs from wheel cartridges. The stand had external roller drive. All the problems of roller stands for diagnostics of locomotive running gear became vivid on this stand. The main problems are influence of non circularity of wheels and rollers on defects’ diagnostic symptoms in bearing vibration. Besides it is essential to provide different rotation speed for two wheel pairs in one cartridge and to adapt diagnostic software to take into account influence of one wheel pair vibration on another one within one cartridge. Figures 10 and 11 present vibration autospectra and envelope spectra for box 
+
+bearings of a wheel pair cartridge where you can see all above mentioned problems. On figure 10 you can see the influence of drive rollers on the wheel pair vibration (drive rollers rotation frequency component is modulated by the rotation frequency of the wheel pair). On fig. 11 you can see the influence of another wheel pair on the vibration of the first wheel pair in the cartridge (drive roller rotation frequency component is modulated by both wheel pairs rotation frequencies). 
+
+**==> picture [482 x 283] intentionally omitted <==**
+
+_Fig.10. Vibration spectra of box bearing of a wheel pair measured rotated within a wheel cartridge on a roller stand. Here Fax1 – rotation frequency of the first wheel pair, Fdr1 – rotation speed of the drive rollers for the first wheel pair_ 
+
+**==> picture [482 x 284] intentionally omitted <==**
+
+_Fig.11. Envelope spectra of box bearing of a wheel pair measured rotated within a wheel cartridge on a roller stand. Here Fax1 and Fax1 – rotation frequencies of the first and second wheel pairs, Fdr1 – rotation speed of the drive rollers for the first wheel pair_ 
+
+Wheel pair box bearings vibration diagnostics can be done on special stands in depots. In this case the wheel pair is removed from the wagon installed on special stand. We recommend conducting diagnostic measurements during free run-out of the wheel pair. It is possible to use for this purpose a special diagnostic stand for test diagnostics of the drive motor rotor bearings. Figure 12 presents such a stand including the control and diagnostic hardware. 
+
+**==> picture [335 x 318] intentionally omitted <==**
+
+_Fig.12. Stand for check in of rotor bearings for wheel pairs drive motor_ 
+
+Besides technical problem that can be solved in short term period, economic efficiency problems as well as organizational ones raise the question of whether it is reasonable to design and introduce the stands for box bearing diagnostics within cars or wagons. 
+
+If the intermittent diagnostics results are not sufficient we should use on-board stationary diagnostic systems for both running gear and auxiliary locomotive equipment diagnostics. 
+
+In the simplest case it is possible to use basic on-line measurement and data collection systems for main on-board equipment of the locomotive. Collected measurements can be downloaded and analyzed by experts in depot. To introduce such technology, the methods and requirements for such data collection and recording systems should be designed. If needed, the same systems can solve the problem of basic real time data processing and alarming. The more advanced data processing and analysis algorithms can be implemented afterwards in depot by experts in diagnostics. 
+
+The work in this direction is on the way, as well as design of on-board measurement and data collection systems. Such systems can continuously record and monitor several operating and secondary parameters in locomotive including temperature, electric, vibration ones and periodically recording raw signals in memory. As for the vibration parameters recording during train motion, it I significantly more complicated task as all the technical problems with motion vibration influence on diagnostic signals should be solved before an on-board vibration condition diagnostic system will be designed. 
+
+## **Conclusions.** 
+
+The following conclusions are done based on the last year Association VAST practical experience in locomotive gear condition diagnostics: 
+
+1. Efficiency of locomotive running gear bearings diagnostics in locomotive depot can be high enough to insure safety of locomotive operation, when the following problems are solved: 
+
+ - Introduction of adaptation solutions for automatic diagnostic systems for running 
+
+ - gear of all locomotive models, 
+
+ - Introduction of corporate diagnostic systems that allow most qualified diagnostic 
+
+ - experts to take part in real time diagnostics of some locomotive diagnosis and condition predictions made by automatic system independent of their location. 
+
+ - Training and continuous qualification increase for in locomotive running gear 
+
+ - operators and experts in diagnostics. 
+
+2. To introduce functional diagnostics of the on-board locomotive equipment is necessary to solve organization problems and insure the required operation modes of the equipment during diagnostic measurements in depot and to diagnostic services in the depots with adapted systems for vibration, electric current and infrared analysis. 
+
+3. For diagnostics of railway wagon and cars box bearing on special stands, the stands should be designed taking into account influence of stands on the bearing condition symptoms. 4. The on-board stationary diagnostic systems should be introduced starting with automatic stationary data collection systems installed on the selected equipment. Measured data can be downloaded periodically to the condition diagnostic system in depot. It is recommended to collect data related to vibration, electric current, rotation speed and temperature. 
+
+5. A special study should be conducted to find out if it is possible to conduct locomotive running gear condition monitoring and diagnostics by vibration and drive motor current analysis in locomotive motion taking into account motion influence on the measured parameters. 
+
+## **Bibliography** 
+
+1. ALEXANDROV A., BARKOV A., BARKOVA N., SCHAFRANSKY V. - Vibration and Vibrodiagnostics of Electrical Equipment on Ships, - Sudostroenie, Leningrad, 1986. 
+
+2. AZOVTSEV Yu., BARKOV A., Yudin I. - "Automatic Diagnostics Of Rolling Element Bearings Using Enveloping Methods"- Proceedings of the 18TH Annual Meeting of the Vibration Institute, Hershey, PA, USA 1994. 
+
+3. A. V. Barkov and N. A. Barkova, "Condition Assessment and Life Prediction of Rolling Element Bearings", Sound and Vibration, June-part 1 and September - part 2, 1995, 
+
+4. A.V. Barkov, N.A. Barkova, A.Y. Azovtsev "PECULIARITIES OF THE VIBRATION DIAGNOSTICS IN TRANSPORT INDUSTRY" presented at the COMADEM 2003 conference, Vaxjo, Sweden, August 26-29 2003

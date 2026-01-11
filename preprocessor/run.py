@@ -1,116 +1,116 @@
 import sys
 import os
 
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from config import PreprocessorConfig, Paths
-
+import json
+from pathlib import Path
 from argparse import ArgumentParser
+
+from config import PreprocessorConfig, Paths
 from preprocessor.mixins.file_converter import FilePreprocessor
 from preprocessor.mixins.text_clener import TextCleaner
 from preprocessor.mixins.markdown_chunker import MarkdownChunker
 from utils.custom_logger import set_logger
 
-logger = set_logger(Paths.LOG_FILE)
-
-args = ArgumentParser()
-args.add_argument("--all", action="store_true", help="Run all preprocessors")
-
-
-args, _ = args.parse_known_args()
-
 
 class PreprocessorRunner:
 
-    def __init__(self, run_all: bool = False, logger=None):
-        logger_obj = logger or set_logger(Paths.LOG_FILE)
-        logger_obj.debug("Initializing PreprocessorRunner...")
-        self.logger = logger_obj
-        self._ensure_dirs()
+    def __init__(self, convert: bool = False, logger=None):
+        self.logger = logger or set_logger(Paths.LOG_FILE)
+        self.convert = convert
+
         self.file_preprocessor = FilePreprocessor()
         self.text_cleaner = TextCleaner()
         self.markdown_chunker = MarkdownChunker()
-        self.run_all = run_all
+
+        self._ensure_dirs()
 
     def _ensure_dirs(self):
         for k, v in Paths.__dict__.items():
             if k.isupper() and k not in ["LOG_FILE", "QA_DATASET", "QA_LORA_DATASET"]:
                 os.makedirs(v, exist_ok=True)
 
-    def convert_raw_docs(self):
-        """Convert raw documents to markdown files (runs only when run_all is True)."""
-        self.logger.debug("Converting raw docs...")
-        try:
-            files_list = os.listdir(Paths.RAW_DOCS)
-        except FileNotFoundError:
-            self.logger.warning(f"Raw docs directory not found: {Paths.RAW_DOCS}")
-            return
+    # ---------- STAGE 1: RAW → MD ----------
 
-        self.logger.debug(f"Found {len(files_list)} files in raw docs.")
-        if not self.run_all:
-            self.logger.debug("Skipping conversion of raw docs because run_all is False.")
+    def convert_raw_docs(self):
+        if not self.convert:
+            self.logger.debug("Skipping raw → md conversion")
             return
 
         for ext in PreprocessorConfig.FILE_EXTENTIONS:
-            raw_doc_fpaths = [os.path.join(Paths.RAW_DOCS, f) for f in files_list if f.lower().endswith(ext.lower())]
-            self.logger.debug(f"Processing {len(raw_doc_fpaths)} files with extension .{ext}...")
-            for fpath in raw_doc_fpaths:
+            for fname in os.listdir(Paths.RAW_DOCS):
+                if Path(fname).suffix.lower() != f".{ext.lower()}":
+                    continue
+
+                fpath = os.path.join(Paths.RAW_DOCS, fname)
+                out_md = os.path.join(Paths.MD_DOCS, Path(fname).stem + ".md")
+
+                if os.path.exists(out_md):
+                    continue
+
                 try:
-                    self.logger.debug(f"Converting file: {os.path.basename(fpath)}")
-                    outfpath = os.path.join(Paths.CLEAN_DOCS, os.path.basename(fpath).replace(f".{ext}", ".md"))
-                    self.logger.debug(f"outpath: {outfpath}")
-                    self.file_preprocessor.preprocess_file_to_markdown(fpath, outfpath, ext)
+                    self.logger.info(f"Converting {fname}")
+                    self.file_preprocessor.preprocess_file_to_markdown(fpath, out_md, ext)
                 except Exception as e:
-                    self.logger.exception(f"Failed to convert {fpath}: {e}")
+                    self.logger.exception(f"Failed to convert {fname}: {e}")
+
+    # ---------- STAGE 2: CLEAN → CHUNK ----------
 
     def clean_and_chunk(self):
-        """Clean all markdown files and save chunks and references."""
-        self.logger.debug("Cleaning and chunking markdown docs...")
-        try:
-            md_docs = [f for f in os.listdir(Paths.CLEAN_DOCS) if f.endswith(".md")]
-        except FileNotFoundError:
-            self.logger.warning(f"Clean docs directory not found: {Paths.CLEAN_DOCS}")
-            return
+        for md_file in os.listdir(Paths.MD_DOCS):
+            if not md_file.endswith(".md"):
+                continue
 
-        for md_doc in md_docs:
-            outfpath = os.path.join(Paths.CLEAN_DOCS, md_doc)
+            doc_id = Path(md_file).stem
+            md_path = os.path.join(Paths.MD_DOCS, md_file)
+
             try:
-                with open(outfpath, "r", encoding="utf-8") as f:
-                    raw = f.read()
+                raw = Path(md_path).read_text(encoding="utf-8")
 
-                self.logger.debug(f"Cleaning text for {md_doc}...")
                 main_text, references, metadata = self.text_cleaner.clean_text(raw)
-                doc_id = os.path.splitext(os.path.basename(outfpath))[0]
 
-                # 1️⃣ сохранить чистый текст
-                clean_path = os.path.join(Paths.CLEAN_DOCS, f"{doc_id}.md")
-                with open(clean_path, "w", encoding="utf-8") as f:
-                    f.write(main_text)
+                # --- quality gate ---
+                if len(main_text) < 800:
+                    self.logger.warning(f"{doc_id}: skipped (too small)")
+                    continue
 
-                # 2️⃣ сохранить references отдельно
+                alpha_ratio = sum(c.isalpha() for c in main_text) / max(1, len(main_text))
+                if alpha_ratio < 0.35:
+                    self.logger.warning(f"{doc_id}: skipped (low quality)")
+                    continue
+
+                # --- save clean text ---
+                Path(Paths.CLEAN_DOCS, f"{doc_id}.md").write_text(main_text, encoding="utf-8")
+
+                # --- save references ---
                 if references:
-                    ref_path = os.path.join(Paths.REFERENCES, f"{doc_id}.references.md")
-                    with open(ref_path, "w", encoding="utf-8") as f:
-                        f.write(references)
+                    Path(Paths.REFERENCES, f"{doc_id}.references.md").write_text(references, encoding="utf-8")
 
-                # 3️⃣ чанки
+                # --- save metadata ---
+                Path(Paths.METADATA, f"{doc_id}.json").write_text(
+                    json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+                )
+
+                # --- chunking ---
+                self.logger.info(f"{doc_id}: main_text len={len(main_text)}")
                 docs = self.markdown_chunker.chunk(main_text, doc_id, metadata)
+                self.markdown_chunker.save_chunks(docs, os.path.join(Paths.CHUNKS, f"{doc_id}.jsonl"))
 
-                # 4️⃣ сохранить чанки
-                chunks_path = os.path.join(Paths.CHUNKS, f"{doc_id}.jsonl")
-                self.markdown_chunker.save_chunks(docs, chunks_path)
-                self.logger.debug(f"Saved chunks to {chunks_path}")
             except Exception as e:
-                self.logger.exception(f"Failed to process {outfpath}: {e}")
+                self.logger.exception(f"Failed to process {md_file}: {e}")
 
-    def run_preprocess(self):
-        """High level runner: convert raw docs (optional) then clean and chunk."""
-        self.logger.debug("Starting preprocessing run...")
+    def run(self):
         self.convert_raw_docs()
         self.clean_and_chunk()
 
 
+# ---------- CLI ----------
+
 if __name__ == "__main__":
-    preprocessor = PreprocessorRunner(False)
-    preprocessor.run_preprocess()
+    parser = ArgumentParser()
+    parser.add_argument("--convert", action="store_true", help="Convert RAW → MD")
+    args = parser.parse_args()
+
+    runner = PreprocessorRunner(convert=args.convert)
+    runner.run()

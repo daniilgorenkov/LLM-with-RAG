@@ -98,53 +98,41 @@ class QADatasetBuilder:
         return lemmas
 
     def is_good_qa(self, question: str, answer: str, context: str) -> bool:
-        if not question or not answer:
-            return False
-
-        q = question.strip()
+        q = question.strip().lower()
         a = answer.strip()
-        c = context.strip()
 
-        # if len(q) < 10 or len(a) < 10:
-        #    return False
+        if not q or not a:
+            return False
 
-        # Жёсткая блокировка запрещённых начал вопроса
+        # Запрещаем "плохие" начала только если ответ длинный/обобщающий
         bad_starts = [
-            "какие",
-            "как",
-            "каким",
-            "почему",
-            "зачем",
-            "в каких",
-            "опиши",
-            "расскажи",
-            "объясни",
-            "каковы",
-            "какие-либо",
+            "какие методы",
+            "какие технологии",
+            "какие системы",
+            "какие существуют",
+            "какие данные",
+            "какие параметры",
+            "какие факторы",
         ]
-        if any(q.lower().startswith(b) for b in bad_starts):
-            return False
 
-        if len(a) > len(c) * 0.9:  # смягчили до 0.9
-            return False
+        if any(q.startswith(b) for b in bad_starts) and len(a.split()) > 15:
+            return False  # отсекаем только если ответ слишком длинный
 
-        # Проверка на слишком большое сходство
-        ratio = difflib.SequenceMatcher(None, a.lower(), c.lower()).ratio()
-        if ratio > 0.73 and len(a) > 100:  # только если ответ длинный и почти идентичен
-            return False
+        # Разрешаем "какие значения", "какие пороги", "какие единицы" и т.п.
+        good_starts = ["какие значения", "какие пороги", "какие единицы", "какие документы", "какие размеры"]
+        if any(q.startswith(b) for b in good_starts):
+            # Дополнительно проверяем, что ответ содержит число/единицу/ГОСТ
+            if re.search(r"\d|мм|кн|гост|м|кгс|нм", a.lower()):
+                return True
 
+        # Остальные правила (краткость, отсутствие ...)
         if "..." in a:
             return False
 
         if re.search(r"[а-яa-z]{2,}$", a) is None:
             return False
 
-        # Леммы — хотя бы 2 общих значимых слова
-        answer_lemmas = self.lemmatize_words(a)
-        context_lemmas = self.lemmatize_words(c)
-        if len(answer_lemmas & context_lemmas) < 2:
-            return False
-
+        # Если дошли сюда — пропускаем
         return True
 
     def load_chunks(self, path: str):
@@ -358,5 +346,5 @@ class QADatasetBuilder:
 
 if __name__ == "__main__":
     builder = QADatasetBuilder()
-    builder.build(num_samples=100)  # можно сразу больше для теста
+    builder.build(num_samples=50)  # можно сразу больше для теста
     builder.qa_to_lora_format()

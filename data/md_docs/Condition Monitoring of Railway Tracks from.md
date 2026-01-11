@@ -1,0 +1,345 @@
+_**applied sciences**_ 
+
+**==> picture [35 x 35] intentionally omitted <==**
+
+**==> picture [42 x 28] intentionally omitted <==**
+
+## _Article_ 
+
+# **Condition Monitoring of Railway Tracks from Car-Body Vibration Using a Machine Learning Technique** 
+
+## **Hitoshi Tsunashima[†]** 
+
+Department of Mechanical Engineering, Nihon University, Chiba 275-8575, Japan; 
+
+tsunashima.hitoshi@nihon-u.ac.jp; Tel.: +81-47-474-2339 
+
+† Current Address: 1-2-1 Izumi-cho, Narashino-shi, Chiba, Japan. 
+
+Received: 6 June 2019; Accepted: 4 July 2019; Published: 5 July 2019 
+
+## ��������� **�������** 
+
+**Abstract:** A track condition monitoring system that uses a compact on-board sensing device has been developed and applied for track condition monitoring of regional railway lines in Japan. Monitoring examples show that the system is effective for regional railway operators. A classifier for track faults has been developed to detect track fault automatically. Simulation studies using SIMPACK and field tests were carried out to detect and isolate the track faults from car-body vibration. The results show that the feature of track faults is extracted from car-body vibration and classified from proposed feature space using machine learning techniques. 
+
+**Keywords:** railway; condition monitoring; fault detection; preventive maintenance; machine learning 
+
+## **1. Introduction** 
+
+With the recent development of sensors and information technology (IT), conditions in railway facilities can be monitored continually by using sensors installed in the rolling stock and in areas adjacent to the track. This, in turn, has spurred the interest in using this type of monitoring to create maintenance plans or schedule condition-based maintenance when the track conditions indicate deterioration. 
+
+The condition of railway tracks is an important factor in ensuring the safe operation of trains. To ensure that railway travel is safe and comfortable, it is necessary to maintain and manage tracks properly; this includes preventive maintenance. Further, it is desirable to monitor tracks frequently. The deformations that occur in tracks, referred to as track irregularities, are closely connected to the riding quality and safety of railway vehicles. Urban railway operators use track inspection cars to verify track irregularities. 
+
+Track condition monitoring systems that observe car-body vibrations in in-service vehicles have already been developed for regional railways and have exhibited the capability to oversee track conditions [1]. Additionally, recent studies proposed employing a Kalman filter to predict track irregularities from the acceleration measurements of car-body vibrations of railway vehicles [2]. 
+
+Moreover, on regional railway lines, many operators are unable to implement adequate inspections owing to problems such as cost and personnel constraints. Hence, low-cost monitoring systems have been developed based on on-board sensing devices and global navigation satellite system (GNSS) data. In this system, the sensing device is installed in an in-service vehicle to measure car-body vibrations. The diagnosis is performed by rating the track conditions based on the measurement data. Presently, however, the rating needs to be calculated manually. It is difficult to address a large volume of automatically collected data. To enable the efficient computational processing of collected data, the diagnosis and prediction of track conditions must be automated. 
+
+_Appl. Sci._ **2019** , _9_ , 2734; doi:10.3390/app9132734 
+
+www.mdpi.com/journal/applsci 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+2 of 13 
+
+In the present study, we adopted machine learning techniques and developed an algorithm to automatically diagnose track conditions from car-body vibrations to automatically detect track irregularities and identify them by type. We subsequently performed a simulation to verify the effectiveness of the developed algorithm. In addition, we examined the possibility of diagnosing track conditions for an actual regional railway line. 
+
+## **2. Trends of Track Condition Monitoring** 
+
+The monitoring of railway track geometry from an in-service vehicle became increasingly attractive over the past decade [3]. Track geometry measurement systems using in-service vehicles have been developed worldwide, although they are still in the developing stage. The repeated verification of the same track provides an opportunity to record track geometry degradation. The obtained information is fed back to the track maintenance section to implement necessary steps. 
+
+Several types of track faults are detected by measuring the acceleration of bogies. Weston et al. demonstrated track irregularity monitoring by using bogie-mounted sensors [4,5]. Alfi et al. proposed a technique to estimate long wavelength track irregularities from on-board measurements [6]. If track faults are detected using car-body mounted sensors, it is easier to perform the condition monitoring of track irregularities. The distinctive signal of track faults is hidden in car-body vibrations, and thus signal processing of the acceleration measured in-cabin is necessary to detect the track faults. Tsunashima et al. demonstrated the possibility of estimating the track geometry of Shinkansen tracks using only car-body motions [7,8]. A Kalman filter was applied to estimate the track irregularity from the car-body motions. 
+
+Tsunashima et al. developed a system that attempted to identify vertical and lateral track irregularities by using accelerometers placed on the car-body of in-service vehicles [9]. Furthermore, the system provides a function to listen for corrugation faults by using an acoustic sensor (a microphone). An approach was tested to detect squats by listening to rolling noise using microphones [10]. Odashima et al. demonstrated the possibility of estimating the track irregularities of conventional railway tracks by using only car-body acceleration [2]. The Kalman filter-based estimation technique was proposed for conventional railways and evaluated from data obtained with the track condition monitoring system developed by Tsunashima et al. [1,11]. 
+
+## **3. Development of Track Condition Monitoring System** 
+
+## _3.1. System Overview_ 
+
+Figure 1 presents an overview of the track condition monitoring system. The system in an in-service vehicle consists of a compact on-board sensing device for measuring car-body vibrations and diagnosis software for identifying track conditions from the data. 
+
+**==> picture [285 x 156] intentionally omitted <==**
+
+**Figure 1.** Track condition monitoring system. 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+3 of 13 
+
+The data are transmitted to a server via a wireless phone connection and examined by using track condition diagnosis software. The results of the diagnosis are fed back to the infrastructure providers where they are used to help create maintenance plans, select work locations, and assign work priorities. 
+
+## _3.2. On-Board Sensing Device_ 
+
+Figure 2 shows a photograph of the compact on-board sensing device used in the track condition monitoring system [1,11]. The device consists of an accelerometer and rate gyroscope for detecting track errors, a global navigation satellite system (GNSS) receiver for detecting the train location and speed, and a sensor interface for feeding the signals from the sensors to the computer. 
+
+**==> picture [369 x 118] intentionally omitted <==**
+
+**Figure 2.** On-board sensing device. 
+
+The system is battery-powered and conducts continuous measurements for up to six hours, and thus measurements are simply obtained by placing it in a car. Measurements are constantly obtained if it is powered by a source on the car. Measurement data are stored into an on-board storage device. Furthermore, the device is equipped with a function to automatically transmit measured data from the on-board storage device to a server via a mobile phone network. The device is further equipped with a microphone, and thus, it is also possible to “listen” for corrugation and diagnose the condition. 
+
+The measured data obtained from the measurement device are transmitted to the analysis centre either via a mobile phone network or via writing to external media. The diagnostic results produced by the track monitoring software are used to provide feedback to railway operators through online channels via smartphones or tablet computers. Railway operators use the information to establish the track maintenance priorities, and thereby facilitate the maintenance planning and work. 
+
+Additionally, the real-time measurement of vehicle vibrations during in-service operation allows for rapid response, such as emergency track inspection and maintenance, in situations in which vehicle vibration observations detect irregularly large deviations from standard control values. Thus, the use of the monitoring system to perform continuous monitoring of vehicle vibrations allows early detection of deterioration or other track irregularities, and thereby enables infrastructure providers to conduct effective maintenance work. 
+
+## **4. Track Fault Detection Using Machine Learning** 
+
+## _4.1. Track Irregularities_ 
+
+Track irregularity inspection includes vertical rail profile, lateral alignment, gauge, cross-level, twist and dipped joint, and corrugation as shown in Figure 3. In the developed monitoring system, the detection of track faults for vertical, lateral alignment, and cross-level is possible by using an on-board sensing device. 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+4 of 13 
+
+**==> picture [228 x 234] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> Longitudinal levelVertical Lateral alignment Alignment<br>�10m versine� �10m versine�<br>Cross-levelCross level GaugeGauge<br>Twist<br>Twist<br>Figure 3. Track irregularities.<br>**----- End of picture text -----**<br>
+
+
+Track irregularities cause vehicle vibrations that degrade rider comfort and also increase the risk of derailments. Thus, they are among the most important items that are monitored. Vehicle vibrations are strongly correlated with track irregularities, and thus the magnitude of vehicle vibrations is an effective means for assessing general track condition trends. Thus, sections of track over which high levels of vehicle vibrational acceleration are detected can be considered as indicative of degraded track conditions. 
+
+## _4.2. Multibody Dynamics Simulation_ 
+
+To analyse the effects of railway track deterioration on car-body vibrations, we performed a railway vehicle travel simulation using SIMPACK, a multibody dynamics software package. The model used for the simulation was a single conventional railway vehicle, the parameters for which are shown in Table 1. Figure 4 shows the model used in the simulation. 
+
+**Table 1.** Vehicle parameters. 
+
+|**Description**|**Unit**|**Value**| |---|---|---| |Car-body mass|kg|25,000| |Bogie mass|kg|3100| |Wheelset mass|kg|1500| |Car-body inertia|kgm2|84,100| |Bogie inertia|kgm2|1734.75| |Wheelset inertia|kgm2|735| |Car-body base|m|14.1| |Wheel base|m|2.1| |Primary suspension vertical stiffness|kN/m|2120| |Secondary suspension vertical stiffness|kN/m|200| |Primary suspension lateral stiffness|kN/m|5590| |Secondary suspension lateral stiffness|kN/m|131.3| |Primary suspension vertical damping|kNs/m|78.4| |Secondary suspension vertical damping|kNs/m|48| |Primary suspension lateral damping|kNs/m|78.4| |Secondary suspension lateral stiffness|kNs/m|58.8|
+
+
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+5 of 13 
+
+**==> picture [199 x 149] intentionally omitted <==**
+
+**Figure 4.** Vehicle model. 
+
+The model consists of seven rigid bodies, one car body, two bogies, and four wheelsets, each having six degrees of freedom. Thus, 42 degrees of freedom exist in the model. It is necessary to connect each rigid body with an appropriate joint such that the vehicle exhibits a realistic motion. One car-body, two bogies, and four wheelsets were connected by spring and damper elements. These spring and damper elements were set with spring constants and damping coefficients in three axial directions. 
+
+Using this vehicle model, we calculated the vertical acceleration, lateral acceleration, and roll rate above the centre of the front bogie at the car body. This simulation study is carried out based on the straight track. Alignment irregularity in curved track is not considered in this paper but should be considered in the next work. 
+
+## _4.3. Feature Extraction of Track Faults from Car-Body Vibration_ 
+
+Track irregularities can be used as an index for managing track conditions. The types of track irregularities include longitudinal level irregularities that indicate vertical rail displacement, alignment irregularities that indicate lateral rail displacement, and cross level irregularities that indicate a difference in the elevation of the left and right rails. Because a high degree of correlation exists between these track irregularities and car-body vibrations, the magnitude of car-body vibrations can be an effective method to determine track conditions [12,13]. The track-condition monitoring system can automatically collect the vertical and lateral accelerations and the roll rate of the car body during travel to detect any longitudinal level irregularities, alignment irregularities, and cross level irregularities. 
+
+To identify different types of track faults by using machine-learning techniques, it is necessary to extract the features of each type of track irregularity from the car-body vibrations that occur when travelling on a faulty track. The data obtained by learning the extracted features can be used to construct a training model. Subsequently, if unknown car-body vibration data are input to the model, the type of track irregularity and its degradation level can be identified. 
+
+As shown in Figure 5, we created a baseline track geometry for an assumed regional railway line and a track geometry with increased track irregularities. We subsequently performed a travel simulation by using a track for which all the longitudinal level irregularities, alignment irregularities, and cross level irregularities were within the normal range, and also by using a track for which one type of irregularity was abnormal. Degraded track is generated by the power spectral density of track where the standard deviation becomes twice as large as the normal track. The travelling distance was 1000 m and the travelling speed was 60 km/h. 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+6 of 13 
+
+**==> picture [313 x 262] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> Normal track geometry Degraded track geometry<br>Distance (m)<br>Distance (m)<br>Distance (m)<br>geometry (mm)<br>Longitudinal level<br>Alignment<br>geometry (mm)<br>Cross level<br>geometry (mm)<br>**----- End of picture text -----**<br>
+
+
+**Figure 5.** Baseline and degraded track geometry. 
+
+The acceleration root mean square (RMS) is closely linked to the general health of the running gear and track [12]. Therefore, the acceleration RMS can be used as the primary index to predict the track condition. First, we need to obtain localised RMS values over short time intervals with a small window size to obtain the relationship between track condition and position. The RMS value may be obtained from measured values over a short time segment according to 
+
+**==> picture [269 x 37] intentionally omitted <==**
+
+where _xj_ is the measured vertical acceleration, lateral acceleration or roll angular velocity of car-body and _N_ denotes the sliding window size. 
+
+Track irregularities include longitudinal level irregularities, alignment irregularities, and cross level irregularities. In order to assess the irregularities, we determine the RMS values of vertical acceleration, lateral acceleration, and roll rate measured by the compact-sized on-board sensing device. We compute RMS values by using _N_ = 4 and a sampling frequency of 82 Hz. The number _N_ should be optimised based on the analysis of collected measurement data as the future work. 
+
+Figure 6 shows the results of car-body vibration calculations, which indicate that longitudinal level and alignment irregularities influence the vertical and lateral accelerations, respectively, while cross level irregularities influence both the lateral acceleration and roll rate. The maximum RMS values for the vertical acceleration, lateral acceleration, and roll rate were calculated for each 10 m section. The section length 10 m is decided based on the consideration of GNSS error. 
+
+Figure 7 shows a feature space created by plotting these values in three dimensions. As shown, four clusters are present, representing a normal track, and abnormal tracks with longitudinal level, alignment, and cross level irregularities. It is obvious that such a feature space could be used as training data for machine learning to enable track conditions to be identified. 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+7 of 13 
+
+**==> picture [313 x 562] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> Normal Degraded longitudinal levelDegraded longitudinal level<br>Degraded alignment Degraded cross level<br>Distance (m)<br>Distance (m)<br>Distance (m)<br>Figure 6. Calculated car-body vibration.<br>Degraded longitudinal level<br>Degraded alignment<br>Degraded cross level<br>Normal<br>3<br>2.5<br>2<br>1.5<br>1<br>0.5<br>0<br>0 0<br>0.5 0.05<br>1 0.1<br>1.5 0.15<br>RMS of lateral acc. (m/s [2] ) 2 0.2 RMS of roll rate (rad/s)<br>2)Vertical acc. (m/s<br>2)Lateral acc. (m/s<br> () rad/s ]e [<br>Roll rat<br>)<br>"<br>s<br>RMS of vertical acc.(m/<br>**----- End of picture text -----**<br>
+
+
+**Figure 7.** Feature space of car-body vibration RMS. 
+
+## _4.4. Detection of Track Faults Using Machine Learning_ 
+
+In this study, we used a support vector machine (SVM), which is a type of machine-learning algorithm created to solve two-class classification problems. An SVM identifies the most distant points (“maximum margin”) between two groups and draws a boundary at the centre point between them. A feature of the SVM is that maximising this separation (margin) results in a high degree of generalisation. Utilising the SVM, we classified track conditions by using the following procedure. 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+8 of 13 
+
+First, we classify the obtained data into two classes, “faulty track with longitudinal-level irregularity” or “not.” Next, we classify the data into “faulty track with alignment irregularity” or “not.” Subsequently, we classify the data into “faulty track with cross-level irregularity” or “not.” Finally, if the data are not classified in the faulty data group, the track is diagnosed as normal. By using the procedure above, the track is diagnosed for every 10 m section with the algorithm. 
+
+We have not considered for optimising parameters in SVM [14] in this study, but it should be considered in the future work. 
+
+## **5. Diagnosis Simulation** 
+
+## _5.1. Generation of Car-Body Vibration Data_ 
+
+We performed a vehicle travel simulation using SIMPACK and calculated the car-body vibration when the vehicle was traveling on tracks with different irregularities in some sections. The obtained data were used to detect track faults using the developed algorithm. 
+
+The track geometry used for the simulation differed from that shown in Figure 8. The track faults were modelled by increasing the reference track irregularities by factors of 1.5 and 2.0 times and added to the reference track geometry. Figure 9 shows the modelled track faults. The track geometry used in the simulation was generated by adding the track fault in Figure 8 to the reference track geometry. The total length of the track geometry was 5000 m. Furthermore, 100 faults of longitudinal level, alignment, and cross level irregularities were randamly provided in different places. 
+
+**==> picture [313 x 123] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> Normal track geometry 1.5 times larger 2 times larger2 times larger<br>5 5<br>Distance (m) Distance (m) Distance (m)<br>Alignment Cross level<br>geometry (mm) geometry (mm) geometry (mm)<br>Longitudinal level<br>**----- End of picture text -----**<br>
+
+
+**Figure 8.** Track fault. 
+
+**==> picture [252 x 171] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> Normal track geometry Normal track geometry 1.5 times larger 2 times larger<br>(m)<br>Normal track geometry 1.5 times larger 2 times larger<br>(m)<br>geometry (mm)<br>Longitudinal level<br>Alignment<br>geometry (mm)<br>**----- End of picture text -----**<br>
+
+
+**Figure 9.** _Cont_ . 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+9 of 13 
+
+**==> picture [252 x 81] intentionally omitted <==**
+
+**==> picture [252 x 78] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> Normal track geometry 1.5 times larger 2 times larger<br>(m)<br>Cross level<br>geometry (mm)<br>**----- End of picture text -----**<br>
+
+
+**Figure 9.** Degraded track geometry in some sections. ( **a** ) Longitudinal level geometry. ( **b** ) Alignment geometry. ( **c** ) Cross level geometry. 
+
+Figure 10 shows the calculation result of the car-body vibrations when a vehicle travels the track geometry shown in Figure 9. As shown in Figure 10, only the vertical or lateral acceleration increases when the longitudinal level irregularity or the alignment irregularity increase. As shown, both the lateral acceleration and roll rate increase when the cross level irregularity increases. 
+
+|Normal|track|geometry|1.5|times larger|2 times larger| |---|---|---|---|---|---| |||||(m)||
+
+
+
+|||Normal|track|geometry|**1.5**|**times larger**|2 times larger<br>2 times larger| |---|---|---|---|---|---|---|---| |(m/s2)|||||||| |||||||(m)|| |||Normal|track|geometry|1.5|times larger|**2 times larger**| |(rad/s)|||||||| |||||||(m)||
+
+
+
+**Figure 10.** Calculated car-body vibration by using Figure 9. ( **a** ) Vertical acceleration. ( **b** ) Lateral acceleration. ( **c** ) Roll rate. 
+
+## _5.2. Fault Detection Results_ 
+
+We examined the effectiveness of the developed algorithm by detecting the track fault from the simulated car-body vibration data. For the training data, we used the feature space as shown in Figure 6. The detection results were divided into four classes: normal track, faulty track with longitudinal-level irregularity, faulty track with alignment irregularity, and faulty track with cross-level irregularity. The validity of the detection was evaluated for every 100 faults of longitudinal 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+10 of 13 
+
+level, alignment, and cross level irregularities in 5000 m track lengths. Figure 11 shows the results of detection by using the algorithm. 
+
+**==> picture [285 x 206] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> Longitudinal level<br>Alignment<br>Cross level<br>100<br>80<br>60<br>40<br>20<br>0<br>Normal track 1.5 times 2 times<br>geometry larger larger<br>Detection rate [%]<br>**----- End of picture text -----**<br>
+
+
+**Figure 11.** Detection results. 
+
+As shown in Figure 11, the developed algorithm detected the track fault with an accuracy of 80 percent or more for normal and highly degraded tracks. Clearly, the longitudinal level irregularity can be detected with high accuracy for normal, intermediate, and highly degraded tracks. Meanwhile, the detection accuracy of the alignment and cross level irregularities are lower than that for the longitudinal level irregularity, especially for the intermediately degraded track. However, it is noted that most of the track faults in the regional railway are longitudinal level irregularities. Therefore, the developed diagnosis algorithm is considered effective for regional railway lines. 
+
+The effect of vehicle faults such as wheel flat will appear on the car-body vibration. It is possible to identify the possibility of the faulty train by looking at the measurement data of different places. 
+
+## **6. Application for Regional Railway Line** 
+
+As an initial test of track fault detection using machine learning, we created clusters of simple features from the car-body vibration data for a regional railway line. To measure the vibration, we used an on-board sensing device comprising an accelerometer, a gyroscope, and a GNSS receiver as shown in Figure 12. 
+
+**==> picture [199 x 151] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> On-board sensing<br>device<br>**----- End of picture text -----**<br>
+
+
+**Figure 12.** Measurement of car-body vibration in a regional railway line. 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+11 of 13 
+
+The training data were measured in January, February, May, June, July, and November 2016 for sections of the line where repairs for longitudinal level irregularities were performed in October 2016. Clusters of abnormal track data were created based on the following conditions: 
+
+
+- Longitudinal level irregularity: vertical acceleration _≥_ 1.0 m/s[2] 
+
+
+- Alignment irregularity: lateral acceleration _≥_ 1.1 m/s[2] and roll rate _≤_ 0.05 rad/s 
+
+
+- Cross level irregularity: roll rate _≥_ 0.05 rad/s 
+
+Figure 13 shows the feature space of car-body vibration in a regional railway line. The normal cluster was constructed from car-body vibration data measured in November 2016, immediately after longitudinal level irregularities were repaired. The algorithm detects the location and type of track fault for every 10 m of track. Using the diagnosis algorithm, we diagnosed the track condition in May 2018. 
+
+**==> picture [285 x 270] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> Degraded longitudinal level<br>Degraded alignment<br>Degraded cross level<br>Normal<br>3.0<br>2.5<br>2.0<br>1.5<br>1.0<br>0.5<br>0<br>0 0<br>0.5 0.025<br>1.0 0.050<br>1.5 0.075<br>2.0<br>RMS of lateral acc. (m/s ["] ) 0.100 RMS of roll rate (rad/s)<br>)<br>2RMS of vertical acc. (m/s<br>**----- End of picture text -----**<br>
+
+
+**Figure 13.** Feature space of car-body vibration in a regional railway line. 
+
+Figure 14 shows the measured RMS values for the car-body vibrations and the results obtained by the detection algorithm (colour map in the upper part of each figure). Locations where the RMS values for vertical acceleration, lateral acceleration, and roll rate are large are successfully diagnosed as longitudinal level, alignment, and cross level irregularities, respectively. 
+
+As shown, multiple track faults were detected in location from 25.8 km to 25.9 km. The results indicated that combined faults can be detected by the developed algorithm. Therefore, we can conclude that the proposed method is effective for identifying the location and type of track fault in a regional railway line. 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+12 of 13 
+
+Degraded part in longitudinal level 
+
+**==> picture [302 x 320] intentionally omitted <==**
+
+**----- Start of picture text -----**<br> 2<br>1<br>0<br>25.5 25.6 25.7 25.8 25.9 26.0<br>Distance (km)<br>(a) Detection results for longitudinal level<br>Degraded part in alignment<br>2<br>1<br>0<br>25.5 25.6 25.7 25.8 25.9 26.0<br>Distance (km)<br>(b) Detection results for alignment<br>Degraded part in cross level<br>0.10<br>0.05<br>0<br>25.5 25.6 25.7 25.8 25.9 26.0<br>Distance (km)<br>(c) Detection results for cross level<br>)<br>2<br>(m/s<br>RMS of<br>vertical acc.<br>)<br>2<br>(m/s<br>RMS of<br>lateral acc.<br>RMS of roll rate (rad/s)<br>**----- End of picture text -----**<br>
+
+
+**Figure 14.** Detection results for regional railway line. ( **a** ) Degraded part in longitudinal level. ( **b** ) Degraded part in alignment. ( **c** ) Degraded part in cross level. 
+
+## **7. Conclusions** 
+
+In this study, we analysed the effects of railway track irregularities on car-body vibrations through railway vehicle travel simulations conducted by using the SIMPACK software package. We subsequently developed an algorithm based on machine learning to diagnose track conditions by extracting features to detect track irregularities. 
+
+We used the developed algorithm to detect track faults from the car-body vibrations generated by the simulation. Additionally, we examined the possibility of diagnosing track conditions by using real-world data collected by measurements on an actual regional railway line. The results of this study indicated that the developed algorithm could automatically detect faults associated with longitudinal level, alignment, and cross level irregularities by using measured car-body vibrations. In future work, we plan to create higher-precision training data to improve detection performance. We will also attempt to increase the effectiveness of the current approach by increasing the number of training data clusters and developing an algorithm that can detect the magnitude of track irregularities. 
+
+**Funding:** This research was funded by JSPS KAKENHI Grant Number 17K06240. 
+
+**Acknowledgments:** We would like to thank Editage (www.editage.jp) for English language editing. **Conflicts of Interest:** The author declares no conflict of interest. 
+
+_Appl. Sci._ **2019** , _9_ , 2734 
+
+13 of 13 
+
+## **References** 
+
+1. Tsunashima, H.; Mori, H.; Ogino M.; Asano, A. Development of Track Condition Monitoring System Using Onboard Sensing Device. In _Railway Research—Selected Topics on Development, Safety and Technology_ ; Zboinski, K., Ed.; InTech: Rijeka, Croatia, 2015; pp. 145–164. 
+
+2. Odashima, M.; Azami, S.; Naganuma, Y.; Mori, H.; Tsunashima, H. Track geometry estimation of a conventional railway from car-body acceleration measurement. _Mech. Eng. J._ **2017** , _4_ , 16-00498. [CrossRef] 
+
+3. Weston, P.; Roberts, C.; Yeo G.; Stewar, E. Perspectives on railway track geometry condition monitoring from in-service railway vehicles. _Veh. Syst. Dyn._ **2015** , _53_ , 1063–1091. [CrossRef] 
+
+4. Weston, P.; Ling, C.; Goodman, C.; Roberts, C.; Li, P.; Goodall, R. Monitoring vertical track irregularity from in-service railway vehicles. _Proc. Inst. Mech. Eng. Part F J. Rail Rapid Transit_ **2007** , _221_ , 75–88. [CrossRef] 
+
+5. Weston, P.; Ling, C.; Goodman, C.; Roberts, C.; Li, P.; Goodall, R. Monitoring lateral track irregularity from in-service railway vehicles. _Proc. Inst. Mech. Eng. Part F J. Rail Rapid Transit_ **2007** , _221_ , 89–100. [CrossRef] 
+
+6. Alfi, S.; Bruni, S. Estimation of long wavelength track irregularity from onboard measurement. In Proceedings of the 4th IET International Conference on Railway Condition Monitoring (RCM2008), London, UK, 18–20 June 2008. 
+
+7. Tsunashima, H.; Naganuma, Y.; Kobayashi, T. Track geometry estimation from car-body vibration. _Veh. Syst. Dyn._ **2014** , _52_ (Suppl. 1), 207–219. [CrossRef] 
+
+8. Naganuma, Y.; Azami, S.; Tsunashima, H. Track Geometry Estimation from Car-body Motions of Shinkansen Vehicles. In Proceedings of the International Symposium on Speed-up and Sustainable Technology for Railway and Maglev Systems 2015 (STECH2015), Chiba, Japan, 10–12 November 2015. 
+
+9. Tsunashima, H.; Naganuma, Y.; Matsumoto, A.; Mizuma, T.; Mori, H. Japanese railway condition monitoring of tracks using in-service vehicle. In Proceedings of the 5th IET Conference on Railway Condition Monitoring (RCM 2011), Derby, UK, 29–30 November 2011. 
+
+10. Schwanen, W.; Kuijpers, A. Early Rail Defect Detection using Sound Measurements. In Proceedings of the Third International Conference on Railway Technology: Research, Development and Maintenance, Sardinia, Italy, 5–8 April 2016. 
+
+11. Mori, H.; Ohno, H.; Tsunashima, H.; Saito, Y. Development of Compact Size Onboard Device for Condition Monitoring of Railway Tracks. _J. Mech. Syst. Trans. Logist._ **2013** , _6_ , 142–149. [CrossRef] 
+
+12. Vinberg, E.; Martin, M.; Firdaus, A.; Tang, Y. _Railway Applications of Condition Monitoring_ ; KTH Royal Institute of Technology: Stockholm, Sweden, 2018, doi:10.13140/RG.2.2.35912.62729. 
+
+13. Kairas, T.; Berg, M.; Stichel, S.; Li, M.; Thomas, D.; Dirks, B. Correlation of track irregularities and vehicle responses based on measured data. _Veh. Syst. Dyn._ **2018** , _56_ , 967–981. [CrossRef] 
+
+14. Tran, K.P.; Huong, T.T. Data driven hyperparameter optimization of one-class support vector machines for anomaly detection in wireless sensor networks. In Proceedings of the 2017 International Conference on Advanced Technologies for Communications (ATC), Quy Nhon, Vietnam, 18–20 October 2017; pp. 6–10. 
+
+**==> picture [84 x 30] intentionally omitted <==**
+
+
+- _⃝_ c 2019 by the authors. Licensee MDPI, Basel, Switzerland. This article is an open access article distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license (http://creativecommons.org/licenses/by/4.0/).

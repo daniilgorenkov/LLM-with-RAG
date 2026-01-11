@@ -2,6 +2,10 @@ import re
 import os
 import json
 from typing import List, Dict
+from utils.custom_logger import set_logger
+from config import Paths
+
+logger = set_logger(Paths.LOG_FILE)
 
 
 class MarkdownChunker:
@@ -36,41 +40,58 @@ class MarkdownChunker:
         if sum(c in "=⋅∑εσλμ√^_" for c in header) > 3:
             return False
 
+        if re.fullmatch(r"\d+(\.\d+){1,5}", header):
+            return True
+
         return True
 
     def split_by_headers(self, text: str):
-        """
-        Разбивает markdown по заголовкам, сохраняя уровень.
-        Формульные и мусорные заголовки игнорируются.
-        """
         pattern = r"(#{1,6})\s+(.*)"
-        lines = text.splitlines()
+        GOST_HEADER = re.compile(r"^(\d+(\.\d+){0,4})\s+(.{5,120})$")
 
+        lines = text.splitlines()
         sections = []
         current = {"header": "ROOT", "level": 0, "content": []}
 
         for line in lines:
-            match = re.match(pattern, line)
-            if match:
-                level = len(match.group(1))
-                header = match.group(2).strip()
+            line_stripped = line.strip()
 
-                # ❗ фильтрация мусорных заголовков
-                if not self.is_valid_header(header):
-                    current["content"].append(line)
+            # Markdown header
+            md_match = re.match(pattern, line)
+            if md_match:
+                header = md_match.group(2).strip()
+                level = len(md_match.group(1))
+
+                if self.is_valid_header(header):
+                    if current["content"]:
+                        sections.append(current)
+
+                    current = {
+                        "header": header,
+                        "level": level,
+                        "content": [],
+                    }
                     continue
 
-                # сохранить предыдущую секцию
-                if current["content"]:
-                    sections.append(current)
+            # GOST header
+            gost_match = GOST_HEADER.match(line_stripped)
+            if gost_match:
+                header = f"{gost_match.group(1)} {gost_match.group(3)}"
+                level = header.count(".") + 1
 
-                current = {
-                    "header": header,
-                    "level": level,
-                    "content": [],
-                }
-            else:
-                current["content"].append(line)
+                if self.is_valid_header(header):
+                    if current["content"]:
+                        sections.append(current)
+
+                    current = {
+                        "header": header,
+                        "level": level,
+                        "content": [],
+                    }
+                    continue
+
+            # ⬅⬅⬅ ВОТ ЭТОГО НЕ ХВАТАЛО
+            current["content"].append(line)
 
         if current["content"]:
             sections.append(current)
@@ -108,6 +129,9 @@ class MarkdownChunker:
                     if i + 2 < n and (text[i + 1].isspace() or text[i + 1] in "\n\r"):
                         boundary = i + 1
                         break
+                elif text[i] == "\n" and i > start + MIN_ADVANCE:
+                    boundary = i
+                    break
 
             # Самое важное — НЕ ДАЁМ продвижению стать слишком маленьким
             if boundary - start < MIN_ADVANCE:
@@ -130,7 +154,13 @@ class MarkdownChunker:
         return chunks
 
     def chunk(self, text: str, doc_id: str, metadata: Dict) -> List[Dict]:
+        # logger.info(f"[{doc_id}] chunk(): text_len={len(text)}")
         sections = self.split_by_headers(text)
+
+        # logger.info(f"[{doc_id}] sections found: {len(sections)}")
+
+        for i, s in enumerate(sections[:5]):
+            logger.info(f"[{doc_id}] section[{i}] header='{s['header']}' len={len(s['content'])}")
         documents = []
 
         for sec in sections:
@@ -146,8 +176,8 @@ class MarkdownChunker:
                     continue
 
                 # Слишком много формул / символов — пропускаем
-                formula_ratio = sum(c in "=⋅∑εσλμ√^_∈∀∃" for c in chunk) / max(1, len(chunk))
-                if formula_ratio > 0.12:
+                formula_ratio = chunk.count("[FORMULA]") * 8 / len(chunk)
+                if formula_ratio > 0.35:
                     continue
 
                 documents.append(
