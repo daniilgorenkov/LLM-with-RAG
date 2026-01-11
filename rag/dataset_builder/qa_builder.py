@@ -2,17 +2,14 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-# print(sys.path)
 import json
 from collections import defaultdict
-import os
-from config import Paths, LLMConfig
-
 import random
 import difflib
 import re
-from rag.generator.llm_client import LLMClient
 from tqdm import tqdm
+from rag.generator.llm_client import LLMClient
+from config import Paths, LLMConfig
 import pymorphy3
 from utils.custom_logger import set_logger
 
@@ -44,98 +41,63 @@ class QADatasetBuilder:
 
     Вопрос и ответ пометь как "Вопрос:" и "Ответ:"
     """
+
     PROMPT_TEMPLATE = """
-    Ты — эксперт в области диагностики дефектов поверхности катания железнодорожных колес.
+    Ты — строгий эксперт в диагностике дефектов поверхности катания железнодорожных колес.
+    Отвечай ТОЛЬКО на русском языке, ТОЛЬКО кириллицей (кроме названий стандартов и аббревиатур).
 
-    Сформулируй ОДИН технический вопрос и ОДИН краткий ответ
-    СТРОГО на основе приведённого контекста.
+    СТРОГО СЛЕДУЙ ПРАВИЛАМ:
 
-    Ключевые технические термины:
-    - дефект поверхности катания
-    - динамические напряжения
-    - колесная пара
-    - поверхность катания
-    - модель машинного обучения
-    - нейронная сеть
-    - ползун
-    - выщербина
-    - неравномерный прокат
-    - изношенный гребень
-    - рельсы
-    - тензометрические датчики
-    - вертикальная сила в системе колесо-рельс
-    - боковая сила в системе колесо-рельс
+    1. Сформулируй РОВНО ОДИН технический вопрос и ОДИН краткий ответ.
+    2. Вопрос ОБЯЗАТЕЛЬНО начинается с одного из вариантов:
+       • Какое значение...?
+       • Каков порог...?
+       • При каком значении...?
+       • Чему равно максимально допустимое...?
+       • Как классифицируется дефект...?
+       • В каком документе...?
+       • Согласно какому ГОСТ...?
+       ЗАПРЕЩЕНО начинать с: какие, как, каким образом, почему, зачем, опиши, расскажи и т.п.
 
-    Допустимые типы вопросов:
-    - о числовых порогах и значениях
-    - о классификации дефектов
-    - о критериях принятия решения
-    - о параметрах измерения
-    - о ссылках на таблицы, нормы, стандарты
+    3. Ответ — максимум 1–2 предложения. Только факт из контекста.
+    4. Никогда не придумывай числа, пороги, названия документов — только то, что явно есть в тексте.
+    5. Если нужной информации нет — отвечай строго:
+       Вопрос: Недостаточно данных
+       Ответ: Недостаточно данных
 
-    Запрещено НИ В КОЕМ СЛУЧАЕ начинать вопрос со слов:
-    какие, как, каким образом, каким, почему, зачем, в чём заключается, опиши, расскажи, объясни, в каких случаях
+    Примеры правильных пар (следуй этому стилю):
 
-    Разрешены только вопросы вида:
-    • Какое значение...?
-    • Каков порог...?
-    • При каком условии...?
-    • Какой интервал считается...?
-    • Чему равно максимально допустимое...?
-    • Как классифицируется дефект при ... ?
-    • Какой критерий используется для ... ?
+    Вопрос: Какой диапазон толщины гребня колеса в эксплуатации?
+    Ответ: От 24 до 33 м.
 
-    Примеры правильных пар:
+    Вопрос: В каком документе указаны пороги вертикальной силы?
+    Ответ: ГОСТ 34759-2021.
 
-    Вопрос: Какой интервал скорости является критическим для автоматической передачи данных?
-    Ответ: От 45 до 50 м/с
-
-    Вопрос: Какова предельная величина неравномерного проката для колес пассажирских вагонов?
-    Ответ: 0,5 мм
-
-    Вопрос: При каком значении вертикальной силы возникает риск выщербины?
-    Ответ: Более 120 кН
-
-    Вопрос: В каком документе указаны пороги вертикальной силы в системе колесо-рельс?
-    Ответ: ГОСТ 34759-2021
-
-    Вопрос: До какого значения вертикальной силы допускается эксплуатация колесной пары?
-    Ответ: До 350кН, согласно ГОСТ 34759-2021
-
-    ЕСЛИ информации недостаточно, напиши:
-
-    {answer_rules}
+    Вопрос: До какого значения допускается вертикальная сила в системе колесо-рельс?
+    Ответ: До 350 кН, согласно ГОСТ 34759-2021.
 
     Контекст:
     {contexts}
     """
 
-    N_SAMPLES: int = 2
-    MAX_CONTEXT_CHARS = 1200
+    N_SAMPLES: int = 3
+    MAX_CONTEXT_CHARS = 1200  # немного увеличили — современные модели нормально справляются
 
-    def __init__(
-        self,
-        max_contexts: int = 3,
-    ):
+    def __init__(self, max_contexts: int = 3):
         self.max_contexts = max_contexts
         self.llm_asker = LLMClient(online=LLMConfig.ONLINE)
         self.morph = pymorphy3.MorphAnalyzer()
 
     def lemmatize_words(self, text: str):
-        """
-        Возвращает множество лемм слов длиной >=5 букв из текста.
-        """
-
         words = re.findall(r"[а-яa-z]{5,}", text.lower())
         lemmas = set()
         for w in words:
-            lemma = self.morph.parse(w)[0].normal_form  # берём наиболее вероятную лемму
+            lemma = self.morph.parse(w)[0].normal_form
             if len(lemma) >= 5:
                 lemmas.add(lemma)
         return lemmas
 
     def is_good_qa(self, question: str, answer: str, context: str) -> bool:
-        # 1. Пустые поля
         if not question or not answer:
             return False
 
@@ -143,42 +105,44 @@ class QADatasetBuilder:
         a = answer.strip()
         c = context.strip()
 
-        # 2. Слишком коротко / слишком длинно
-        if len(q) < 10 or len(a) < 5:
+        # if len(q) < 10 or len(a) < 10:
+        #    return False
+
+        # Жёсткая блокировка запрещённых начал вопроса
+        bad_starts = [
+            "какие",
+            "как",
+            "каким",
+            "почему",
+            "зачем",
+            "в каких",
+            "опиши",
+            "расскажи",
+            "объясни",
+            "каковы",
+            "какие-либо",
+        ]
+        if any(q.lower().startswith(b) for b in bad_starts):
             return False
 
-        if len(a) > len(c) * 0.8:
+        if len(a) > len(c) * 0.9:  # смягчили до 0.9
             return False
 
-        # 3. Ответ почти копия контекста
+        # Проверка на слишком большое сходство
         ratio = difflib.SequenceMatcher(None, a.lower(), c.lower()).ratio()
-        if ratio > 0.91 and len(a) / max(1, len(c)) > 0.75:
+        if ratio > 0.73 and len(a) > 100:  # только если ответ длинный и почти идентичен
             return False
 
-        # 4. Признаки обрезки
         if "..." in a:
             return False
 
         if re.search(r"[а-яa-z]{2,}$", a) is None:
             return False
 
-        BAD_QUESTION_STARTS = [
-            "какие методы",
-            "как используются",
-            "какие системы",
-            "каким образом применяется",
-        ]
-
-        if any(q.lower().startswith(p) for p in BAD_QUESTION_STARTS):
-            return False
-
-        # 5. Эвристика: хотя бы часть ответа есть в контексте
+        # Леммы — хотя бы 2 общих значимых слова
         answer_lemmas = self.lemmatize_words(a)
         context_lemmas = self.lemmatize_words(c)
-
-        overlap = answer_lemmas.intersection(context_lemmas)
-
-        if len(overlap) < 2:
+        if len(answer_lemmas & context_lemmas) < 2:
             return False
 
         return True
@@ -196,7 +160,7 @@ class QADatasetBuilder:
             grouped[c["metadata"]["doc_id"]].append(c)
         return grouped
 
-    def extarct_keywords(self, text: str, top_k=10):
+    def extract_keywords(self, text: str, top_k=10):  # ← исправлена опечатка
         lemmas = self.lemmatize_words(text)
         return list(lemmas)[:top_k]
 
@@ -213,27 +177,63 @@ class QADatasetBuilder:
 
         return "\n\n".join(texts)
 
-    def select_good_start_idx(self, doc_chunks, n_select=4):
-        scores = []
-        for i in range(len(doc_chunks)):
-            text = doc_chunks[i]["text"]
-            # Простая эвристика "ценности" чанка
-            num_score = len(re.findall(r"\d+[,.]?\d*", text)) * 3
-            key_score = sum(1 for kw in ["мм", "кН", "ГОСТ", "порог", "критическ", "допуск"] if kw in text.lower())
-            length_score = len(text) / 300
-            total = num_score + key_score + length_score
-            scores.append((total, i))
+    def chunk_density_score(self, text: str) -> float:
+        """Оценка ценности чанка"""
+        text_lower = text.lower()
+        num_count = len(re.findall(r"\d+[,.]?\d*", text_lower))
+        key_words = [
+            "мм",
+            "кн",
+            "гост",
+            "порог",
+            "допуск",
+            "критическ",
+            "предельн",
+            "выщербина",
+            "прокат",
+            "гребень",
+            "износ",
+            "дефект",
+            "поверхност",
+            "катания",
+            "колесн",
+            "пара",
+            "рельс",
+            "сила",
+            "датчик",
+            "модель",
+        ]
+        kw_count = sum(text_lower.count(kw) for kw in key_words)
+        length_bonus = len(text) / 400.0
+        return (num_count * 5) + (kw_count * 2) + length_bonus
 
+    def select_best_start_idx(self, doc_chunks):
+        if len(doc_chunks) <= self.max_contexts:
+            return 0
+
+        scores = [(self.chunk_density_score(c["text"]), i) for i, c in enumerate(doc_chunks)]
         scores.sort(reverse=True)
-        good_indices = [idx for _, idx in scores[:n_select]]
 
-        if not good_indices:
+        top_indices = [idx for _, idx in scores[:8]]  # берём из топ-8
+
+        if not top_indices:
             return random.randint(0, len(doc_chunks) - self.max_contexts)
 
-        # Берём самый ценный и пытаемся взять соседние
-        best = good_indices[0]
-        start = max(0, best - random.randint(0, 2))
+        best = top_indices[0]
+        # Берём начало окна так, чтобы захватить лучший чанк + немного соседей
+        start = max(0, best - random.randint(0, 3))
+        if start + self.max_contexts > len(doc_chunks):
+            start = len(doc_chunks) - self.max_contexts
+
         return start
+
+    def is_context_useful(self, text: str) -> bool:
+        """Пропускаем совсем пустые/бесполезные контексты"""
+        if len(text) < 400:
+            return False
+        num_count = len(re.findall(r"\d", text))
+        kw_count = len(re.findall(r"(мм|кн|гост|порог|допуск|выщербина|прокат)", text.lower()))
+        return num_count >= 1 or kw_count >= 2
 
     def build_qa_samples(self, chunks: list):
         samples = []
@@ -241,31 +241,48 @@ class QADatasetBuilder:
         grouped = self.group_by_doc(chunks)
 
         for doc_id, doc_chunks in grouped.items():
-            chunk_l = len(doc_chunks)
-            if chunk_l < self.max_contexts:
-                start_idx = 0
-            else:
-                start_idx = self.select_good_start_idx(doc_chunks)
+            if len(doc_chunks) == 0:
+                continue
 
+            start_idx = self.select_best_start_idx(doc_chunks)
             contexts = doc_chunks[start_idx : start_idx + self.max_contexts]
             texts = self.build_context(contexts)
-            keywords = self.extarct_keywords(texts)
-            texts = "Ключевые технические термины:\n" + ", ".join(keywords) + "\n\n" + texts
+
+            if not self.is_context_useful(texts):
+                logger.debug(f"Context too weak for {doc_id} → skip")
+                continue
+
+            keywords = self.extract_keywords(texts)
+            full_text = "Ключевые термины: " + ", ".join(keywords[:12]) + "\n\n" + texts
+
+            QUESTION_TEMPLATES = [
+                "Какое значение {topic}?",
+                "Каков максимально допустимый {topic}?",
+                "При каком значении {topic} возникает риск дефекта?",
+                "Согласно какому документу устанавливается {topic}?",
+                "Чему равен порог {topic}?",
+            ]
+
+            # В build_qa_samples перед формированием промпта:
+            template = random.choice(QUESTION_TEMPLATES).format(
+                topic="порог вертикальной силы / неравномерного проката"
+            )
+            texts = f"Предпочтительный шаблон вопроса: {template}\n\n" + texts
 
             if LLMConfig.ONLINE:
-                prompt = self.PROMPT_TEMPLATE.format(answer_rules=self.OPEN_AI_ANSWER_RULES, contexts=texts)
+                prompt = self.PROMPT_TEMPLATE.format(answer_rules=self.OPEN_AI_ANSWER_RULES, contexts=full_text)
             else:
-                prompt = self.PROMPT_TEMPLATE.format(answer_rules=self.OFFLINE_LLM_ANSWER_RULES, contexts=texts)
+                prompt = self.PROMPT_TEMPLATE.format(answer_rules=self.OFFLINE_LLM_ANSWER_RULES, contexts=full_text)
 
             qa = self.llm_asker.ask_direct_llm(prompt)
 
+            # Убираем китайские иероглифы сразу
             if isinstance(qa, dict):
-                # del chineese chars
-                qa["question"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["question"])
-                qa["answer"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["answer"])
+                qa["question"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["question"].strip())
+                qa["answer"] = re.sub(r"[\u4e00-\u9fff]+", "", qa["answer"].strip())
 
                 if not self.is_good_qa(qa["question"], qa["answer"], texts):
-                    logger.debug(f"Bad qa: question:{qa['question']}, answer: {qa['answer']}")
+                    logger.debug(f"Bad qa: question:{qa['question']}\nanswer: {qa['answer']}, context: {full_text}")
                     continue
 
                 sample = {
@@ -274,15 +291,8 @@ class QADatasetBuilder:
                     "contexts": texts,
                     "sources": [doc_id],
                 }
-
-            elif qa is not None:
-                sample = {
-                    "text": qa,
-                    "contexts": texts,
-                    "sources": [doc_id],
-                }
             else:
-                sample = None
+                continue  # если не dict — пропускаем
 
             if sample:
                 samples.append(sample)
@@ -302,12 +312,23 @@ class QADatasetBuilder:
                 f.write(json.dumps(s, ensure_ascii=False) + "\n")
 
     def build(self, num_samples: int = 100):
+        # Собираем ВСЕ чанки из всех файлов один раз (в начале)
+        all_chunks = []
+        for chunk_file in os.listdir(Paths.CHUNKS):
+            path = os.path.join(Paths.CHUNKS, chunk_file)
+            all_chunks.extend(self.load_chunks(path))
+
+        logger.info(f"Total chunks loaded: {len(all_chunks)}")
 
         for _ in tqdm(range(num_samples), desc="generating qa dataset"):
-            chunks_list = os.listdir(Paths.CHUNKS)
-            random_chunk = random.choice(chunks_list)
-            sample_chunk = self.load_chunks(os.path.join(Paths.CHUNKS, random_chunk))
-            samples_raw = self.build_qa_samples(sample_chunk)
+            # Берём случайные max_contexts чанков из всего пула
+            if len(all_chunks) < self.max_contexts:
+                selected = all_chunks
+            else:
+                selected = random.sample(all_chunks, self.max_contexts)
+
+            # Генерируем QA только из этих случайных чанков
+            samples_raw = self.build_qa_samples(selected)
             self.save(samples_raw, os.path.join(Paths.DATA, "qa_dataset.jsonl"))
 
     def qa_to_lora_format(self):
@@ -337,5 +358,5 @@ class QADatasetBuilder:
 
 if __name__ == "__main__":
     builder = QADatasetBuilder()
-    builder.build(num_samples=20)
+    builder.build(num_samples=100)  # можно сразу больше для теста
     builder.qa_to_lora_format()

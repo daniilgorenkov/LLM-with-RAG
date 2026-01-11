@@ -15,6 +15,8 @@ class Reranker:
         """
         docs: list of dicts with 'text'
         """
+        # print("Первый документ из списка:", docs[0] if docs else "пусто")
+        # print("Тип элементов:", type(docs[0]) if docs else None)
         pairs = [(question, d["text"]) for d in docs]
 
         scores = self.model.predict(pairs)

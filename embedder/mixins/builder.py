@@ -40,9 +40,6 @@ class EmbeddingBuilder:
         return embeddings, metadatas
 
     def build_embeddings_from_dir(self, chunks_dir: str):
-        """
-        Строит эмбеддинги для ВСЕХ файлов в директории
-        """
         all_texts = []
         all_metadatas = []
 
@@ -55,8 +52,12 @@ class EmbeddingBuilder:
             with open(path, "r", encoding="utf-8") as f:
                 for line in f:
                     obj = json.loads(line)
+
+                    # Самое важное: сохраняем текст + метаданные вместе
+                    full_meta = {**obj["metadata"], "text": obj["text"]}
+
                     all_texts.append("passage: " + obj["text"])
-                    all_metadatas.append(obj["metadata"])
+                    all_metadatas.append(full_meta)  # ← теперь здесь есть "text"!
 
         logger.debug(f"Total chunks: {len(all_texts)}")
 
