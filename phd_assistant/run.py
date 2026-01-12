@@ -9,8 +9,8 @@ from phd_assistant import PhDAssistant
 rag = RAGPipeline(llm_type="local_lora")
 assistant = PhDAssistant(rag)
 
-result = assistant.generate_section(
-    topic="Системы диагностики подвижного состава железных дорог", section_name="01_overview"
+result = assistant.generate_section_iterative(
+    topic="Искусственный интеллект и модели машинного обучения в системах диагностик", section_name="04_overview"
 )
 
-print(result["draft"])
+# print(result["draft"])

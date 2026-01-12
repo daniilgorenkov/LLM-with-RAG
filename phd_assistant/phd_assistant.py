@@ -6,6 +6,9 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from rag.generator.qa_pipeline import RAGPipeline
 from config import Paths
+from utils.custom_logger import set_logger
+
+logger = set_logger(Paths.LOG_FILE)
 
 
 class PhDAssistant:
@@ -69,6 +72,29 @@ class PhDAssistant:
         - сохранить существующую структуру текста
         """
 
+        self.SYSTEM_JUDGE = """"Вы — научный редактор и методолог. Ваша задача - оценить предоставленный текст """
+
+        self.SYSTEM_FINALIZE = """"
+        Вы — научный редактор.
+
+        Ваша задача — довести текст раздела диссертации до завершённого вида.
+
+        Разрешено:
+        - устранить обрывы предложений
+        - логически завершить последний абзац
+        - исправить опечатки
+        - устранить повторы
+        - привести список литературы в завершённый вид
+        - допустимые языки в тексте русский и Английский
+
+        Запрещено:
+        - добавлять новые факты
+        - добавлять новые источники
+        - делать выводы
+        - менять структуру раздела
+
+        Результат должен выглядеть как законченный раздел диссертации.
+        """
         self.base_dir = Path(Paths.PHD)
         self.base_dir.mkdir(exist_ok=True)
 
@@ -188,6 +214,8 @@ class PhDAssistant:
         ОТВЕТОМ МОГУТ БЫТЬ ТОЛЬКО:
         - Да
         - Нет
+
+        Если текст не завершен логически, то нужно писать - НЕТ
         """
 
     # ---------- CORE ----------
@@ -197,6 +225,8 @@ class PhDAssistant:
             "review": self.SYSTEM_REVIEWER,
             "rewrite": self.SYSTEM_EDITOR,
             "plan": self.SYSTEM_PLAN,
+            "judge": self.SYSTEM_JUDGE,
+            "finalize":self.SYSTEM_FINALIZE
         }[mode]
 
         messages = [
@@ -209,7 +239,7 @@ class PhDAssistant:
         return text
 
     def _retrieve_context(self, topic: str) -> str:
-        results = self.rag.retriever.search(topic, top_k=3)
+        results = self.rag.retriever.search(topic, top_k=10)
 
         if not results:
             return ""
@@ -223,10 +253,12 @@ class PhDAssistant:
         section_name: str,
         max_iters: int = 3,
     ):
+        logger.debug(" ============== START TEXT GENERATION FOR TOPIC ============== ")
         context = self._retrieve_context(topic)
         if not context:
             raise ValueError("Недостаточно контекста")
 
+        logger.debug("Generating draft...")
         draft = self._generate(
             self.build_generation_prompt(topic, context),
             mode="draft",
@@ -234,21 +266,28 @@ class PhDAssistant:
 
         history = []
 
+        logger.debug("Starting iterative text evaluation...")
         for iteration in range(1, max_iters + 1):
             review = self._generate(
                 self.build_review_prompt(draft, context),
                 mode="review",
             )
 
+            logger.debug("Draft reviewed")
+
             plan = self._generate(
                 self.build_checklist_prompt(draft),
                 mode="plan",
             )
 
+            logger.debug("Created todo list based on review")
+
             revised = self._generate(
                 self.build_revision_prompt(draft, review, plan, context),
                 mode="rewrite",
             )
+
+            logger.debug("Revised draft based on context, review and checklist")
 
             judge = self._generate(
                 self.build_quality_prompt(revised),
@@ -266,15 +305,20 @@ class PhDAssistant:
                 }
             )
 
-            if "Да" in judge:
-                break
-
             draft = revised  # следующий цикл
 
+        final_text = history[-1]["revised"]
+
+        finalized = self._generate(
+            final_text,
+            mode="finalize",
+        )
+
+        history[-1]["final"] = finalized
         paths = self._save_iterative(section_name, history)
 
         return {
-            "final_text": history[-1]["revised"],
+            "final_text": history[-1]["final"],
             "iterations": history,
             "paths": paths,
         }
