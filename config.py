@@ -15,7 +15,7 @@ class Paths:
     LOG_FILE = os.path.join(WORKDIR, "log.log")
     QA_DATASET = os.path.join(DATA, "qa_dataset.jsonl")
     QA_LORA_DATASET = os.path.join(DATA, f"qa_lora.jsonl")
-    LORA_QWEEN = os.path.join(DATA, "lora_qween")
+    LORA_QWEEN = os.path.join(DATA, "big_lora_qween")
     PHD = os.path.join(DATA, "phd")
 
 
@@ -50,3 +50,12 @@ class LoRAConfig:
     BATCH_SIZE = 1
     EPOCHS = 1500
     GRAD_ACCUM = 8
+
+
+class PHDAssitantConfig:
+
+    QUALITY_CRITERIA = {
+        "min_length": 500,  # символы
+        "max_iterations": 3,
+        "max_review_items": 3,  # если замечаний ≤ 3 — считаем ок
+    }

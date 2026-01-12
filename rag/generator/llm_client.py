@@ -49,24 +49,87 @@ class LLMClient:
             logger.debug(f"Rate limit exceeded for openai model {self.model}, swithing to local model.")
             return False
 
-    def _generate_offline(self, messages: list):
+    def _generate_offline(self, messages: list, mode: str = "qa"):
+
         prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
         inputs = self.tokenizer(prompt, return_tensors="pt").to(CommonConfig.DEVICE)
 
-        outputs = self.model.generate(
-            **inputs,
-            max_new_tokens=300,
-            temperature=0.15,
-            top_p=0.8,
-            top_k=30,
-            do_sample=True,
-            eos_token_id=self.tokenizer.eos_token_id,
-            pad_token_id=self.tokenizer.pad_token_id,
-        )
+        if mode == "qa":
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=300,
+                temperature=0.15,
+                top_p=0.8,
+                top_k=30,
+                do_sample=True,
+                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.pad_token_id,
+            )
+        elif mode == "draft":
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=900,
+                temperature=0.6,
+                top_p=0.9,
+                top_k=50,
+                do_sample=True,
+                repetition_penalty=1.1,
+                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.pad_token_id,
+            )
+        elif mode == "review":
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=400,
+                temperature=0.2,
+                top_p=0.8,
+                top_k=20,
+                do_sample=True,
+                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.pad_token_id,
+            )
+        elif mode == "rewrite":
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=1100,
+                temperature=0.5,
+                top_p=0.9,
+                top_k=40,
+                do_sample=True,
+                repetition_penalty=1.15,
+                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.pad_token_id,
+            )
+        elif mode == "plan":
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=250,
+                temperature=0.15,
+                top_p=0.75,
+                top_k=20,
+                do_sample=True,
+                repetition_penalty=1.05,
+                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.pad_token_id,
+            )
+        elif mode == "judge":
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=150,
+                temperature=0.1,
+                top_p=0.7,
+                top_k=15,
+                do_sample=True,
+                eos_token_id=self.tokenizer.eos_token_id,
+                pad_token_id=self.tokenizer.pad_token_id,
+            )
         return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    def generate(self, messages: list) -> str:
+    def generate(self, messages: list, mode: str = "qa") -> str:
+        """
+        :param: mode:str accepts `qa`, `draft`, `review`, `rewrite`, `plan`, `judge`
+        """
         if self.online:
             try:
                 response = self.client.chat.completions.create(
@@ -79,9 +142,9 @@ class LLMClient:
                 logger.debug(f"Rate limit exceeded for openai model {self.model}, swithing to local model.")
                 self.online = False
                 self.tokenizer, self.model = self._load_offline_model()
-                return self._generate_offline(messages)
+                return self._generate_offline(messages, mode)
         else:
-            return self._generate_offline(messages)
+            return self._generate_offline(messages, mode)
 
     @staticmethod
     def format_llm_answer(raw_answer: str):
