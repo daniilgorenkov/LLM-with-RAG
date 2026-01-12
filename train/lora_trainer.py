@@ -10,6 +10,9 @@ from trl import SFTTrainer
 import torch
 import config
 import os
+from utils.custom_logger import set_logger
+
+logger = set_logger(config.Paths.LOG_FILE)
 
 
 class LoraQATrainer:
@@ -120,13 +123,16 @@ class LoraQATrainer:
             gradient_accumulation_steps=self.grad_accum,
             learning_rate=self.lr,
             max_steps=self.max_steps,
-            logging_steps=10,
+            logging_steps=10,                # каждые 10 шагов — лог
+            # evaluation_strategy="steps",     # ← включить оценку по шагам
+            eval_steps=50,                   # каждые 50 шагов — оценка на валидации
             save_steps=self.max_steps // 3,
             save_total_limit=3,
             optim="paged_adamw_8bit",  # отлично работает с 4bit
             # fp16=True,
             bf16=False,
             report_to="none",
+            logging_dir=config.Paths.LOG_FILE,
             warmup_steps=20,
             gradient_checkpointing=True,  # экономит память
             dataloader_drop_last=True,
@@ -153,9 +159,9 @@ class LoraQATrainer:
         self.load_dataset()
         self.build_trainer()
 
-        print("Начинаем обучение LoRA...")
+        logger.debug("Начинаем обучение LoRA...")
         self.trainer.train()
-        print("Обучение завершено. Сохраняем модель...")
+        logger.debug("Обучение завершено. Сохраняем модель...")
         self.trainer.save_model(self.output_dir)
         self.tokenizer.save_pretrained(self.output_dir)
-        print(f"Модель сохранена в {self.output_dir}")
+        logger.debug(f"Модель сохранена в {self.output_dir}")

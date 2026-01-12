@@ -31,8 +31,8 @@ class EmbedderConfig:
 
 
 class LLMConfig:
-    ONLINE: bool = True
-    BASE_MODEL = "Qwen/Qwen2.5-7B-Instruct"
+    ONLINE: bool = False
+    BASE_MODEL = "/root/qwen2.5-7b-instruct"
     LORA_PATH: str = Paths.LORA_QWEEN
 
 
@@ -48,5 +48,5 @@ class LoRAConfig:
     LORA_DROPOUT = 0.05
     TARGET_MODULES = ["q_proj", "v_proj"]
     BATCH_SIZE = 1
-    EPOCHS = 300
+    EPOCHS = 1500
     GRAD_ACCUM = 8

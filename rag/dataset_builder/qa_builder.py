@@ -81,7 +81,7 @@ class QADatasetBuilder:
     {contexts}
     """
 
-    N_SAMPLES: int = 3
+    N_SAMPLES: int = 6
     MAX_CONTEXT_CHARS = 1200  # немного увеличили — современные модели нормально справляются
 
     def __init__(self, max_contexts: int = 3):

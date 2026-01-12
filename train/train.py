@@ -8,10 +8,10 @@ import config
 
 if __name__ == "__main__":
     trainer = LoraQATrainer(
-        model_name="Qwen/Qwen2.5-1.5B-Instruct",
+        model_name=config.LLMConfig.BASE_MODEL,
         data_path=config.Paths.QA_LORA_DATASET,
-        output_dir=os.path.join(config.Paths.DATA, "lora_qween"),
-        max_steps=500,
+        output_dir=os.path.join(config.Paths.DATA, "big_lora_qween"),
+        max_steps=config.LoRAConfig.EPOCHS,
     )
 
     trainer.train()
