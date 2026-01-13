@@ -29,7 +29,18 @@ class PhDAssistant(AssitantPrompts, QualityChecker):
         return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
     def postprocess(self, text: str):
-        return text.split("<END_OF_SECTION>")[0].strip()
+        text = text.split("<END_OF_SECTION>")[0] # cut chat garbage
+
+        
+        for marker in [
+            "Human:",
+            "Assistant:",
+            "<|answer|>",
+            "<|/answer|>",
+        ]:
+            text = text.split(marker)[0]
+
+        return text.strip()
 
     def generate(self, messages, mode):
         return self.rag.llm.generate(messages, mode)
@@ -151,7 +162,7 @@ class PhDAssistant(AssitantPrompts, QualityChecker):
             final_text = history[-1]["selected"]
 
             finalized = self.generate_text(
-                final_text,
+                self.build_finalize_prompt(final_text),
                 mode="finalize",
             )
 
