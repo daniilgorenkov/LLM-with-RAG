@@ -118,55 +118,75 @@ class PhDAssistant(AssitantPrompts, QualityChecker):
                 mode="judge",
             )
 
+
             history.append(
                 {
                     "iteration": iteration,
                     "draft": draft,
                     "review": review,
                     "plan": plan,
-                    "revised": best,
+                    "revised_raw": revised,
+                    "selected": best,
+                    "candidate_score": candidate_score,
+                    "best_score": best_score,
                     "judge": judge,
                 }
             )
 
+
+
             if judge.strip().lower() == "да":
                 break
 
-            if iteration > 1 and best_score <= history[-1].get("best_score", best_score):
-                logger.debug("Quality stagnation detected")
-                break
+            if iteration > 1:
+                prev_best = history[-2]["best_score"]
+                if best_score <= prev_best:
+                    logger.debug("Quality stagnation detected")
+                    break
 
             draft = best  # следующий цикл
 
-        final_text = history[-1]["revised"]
+            # --- finalize ---
+            final_text = history[-1]["selected"]
 
-        finalized = self.generate_text(
-            final_text,
-            mode="finalize",
-        )
+            finalized = self.generate_text(
+                final_text,
+                mode="finalize",
+            )
 
-        history[-1]["final"] = finalized
-        paths = self._save_iterative(section_name, history)
+            history[-1]["final"] = finalized
+            paths = self._save_iterative(section_name, history)
 
-        return {
-            "final_text": history[-1]["final"],
-            "iterations": history,
-            "paths": paths,
-        }
 
     def _save_iterative(self, section_name: str, history: list):
         section_dir = self.base_dir / section_name
         section_dir.mkdir(exist_ok=True)
 
         for step in history:
-            i = step["iteration"]
-            (section_dir / f"{i}_draft.md").write_text(step["draft"], encoding="utf-8")
-            (section_dir / f"{i}_review.md").write_text(step["review"], encoding="utf-8")
-            (section_dir / f"{i}_plan.md").write_text(step["plan"], encoding="utf-8")
-            (section_dir / f"{i}_revised.md").write_text(step["revised"], encoding="utf-8")
-            (section_dir / f"{i}_judge.txt").write_text(step["judge"], encoding="utf-8")
-            try:
-                (section_dir / f"{i}_final.txt").write_text(step["final"], encoding="utf-8")
-            except Exception:
-                pass
+            iter_dir = section_dir / f"iter_{step['iteration']}"
+            iter_dir.mkdir(exist_ok=True)
+
+            # --- Text artifacts ---
+            (iter_dir / "draft.md").write_text(step["draft"], encoding="utf-8")
+            (iter_dir / "review.md").write_text(step["review"], encoding="utf-8")
+            (iter_dir / "plan.md").write_text(step["plan"], encoding="utf-8")
+            (iter_dir / "revised_raw.md").write_text(step["revised_raw"], encoding="utf-8")
+            (iter_dir / "selected.md").write_text(step["selected"], encoding="utf-8")
+            (iter_dir / "judge.txt").write_text(step["judge"], encoding="utf-8")
+
+            # --- Scores / metrics ---
+            scores = {
+                "candidate_score": step["candidate_score"],
+                "best_score": step["best_score"],
+            }
+            (iter_dir / "scores.json").write_text(
+                json.dumps(scores, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+
+        # --- Final text ---
+        final_text = history[-1].get("final")
+        if final_text:
+            (section_dir / "final.md").write_text(final_text, encoding="utf-8")
+
         return section_dir

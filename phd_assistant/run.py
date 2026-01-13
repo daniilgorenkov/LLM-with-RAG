@@ -12,7 +12,7 @@ ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 rag = RAGPipeline(llm_type="local_lora")
 assistant = PhDAssistant(rag)
 
-result = assistant.generate_section_iterative(
+assistant.generate_section_iterative(
     topic="Искусственный интеллект и модели машинного обучения в системах диагностик", section_name=f"{ts}_overview"
 )
 
