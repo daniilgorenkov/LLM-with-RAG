@@ -69,7 +69,7 @@ class PhDAssistantBot:
 
         async with self.lock:
             try:
-                final_text = await asyncio.to_thread(run_pipeline, question)
+                final_text = run_pipeline(question)
             except Exception as e:
                 await state.clear()
                 await message.answer(f"Ошибка:\n{e}")
