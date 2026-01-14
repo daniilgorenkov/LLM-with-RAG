@@ -9,4 +9,4 @@ def run_pipeline(topic: str) -> str:
     rag = RAGPipeline(llm_type="local_lora")
     assistant = PhDAssistant(rag)
 
-    assistant.generate_section_iterative(topic=topic, section_name=f"{ts}")
+    return assistant.generate_section_iterative(topic=topic, section_name=f"{ts}")

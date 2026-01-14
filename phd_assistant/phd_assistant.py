@@ -154,17 +154,17 @@ class PhDAssistant(AssitantPrompts, QualityChecker):
 
             draft = best  # следующий цикл
 
-            # --- finalize ---
-            final_text = history[-1]["selected"]
+        # --- finalize ---
+        final_text = history[-1]["selected"]
 
-            finalized = self.generate_text(
-                self.build_finalize_prompt(final_text),
-                mode="finalize",
-            )
+        finalized = self.generate_text(
+            self.build_finalize_prompt(final_text),
+            mode="finalize",
+        )
 
-            history[-1]["final"] = finalized
-            self._save_iterative(section_name, history)
-            return finalized
+        history[-1]["final"] = finalized
+        self._save_iterative(section_name, history)
+        return finalized
 
     def _save_iterative(self, section_name: str, history: list):
         section_dir = self.base_dir / section_name

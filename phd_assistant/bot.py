@@ -2,8 +2,7 @@
 import os
 import asyncio
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message
-from aiogram.types import InputMediaDocument
+from aiogram.types import Message, FSInputFile, InputMediaDocument
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -11,7 +10,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config import Paths
 from dotenv import load_dotenv
 from runner import run_pipeline
-
+from huggingface_hub import login
 
 class AskState(StatesGroup):
     waiting_for_question = State()
@@ -21,6 +20,7 @@ class AskState(StatesGroup):
 class PhDAssistantBot:
     def __init__(self):
         load_dotenv("secret.env")
+        login(os.getenv("HF_TOKEN"))
 
         self.bot = Bot(os.getenv("TG_BOT_TOKEN"))
         self.dp = Dispatcher(storage=MemoryStorage())
@@ -110,8 +110,10 @@ class PhDAssistantBot:
     async def _send_files(self, chat_id: int, files: list[str]):
         for i in range(0, len(files), 10):
             batch = files[i : i + 10]
-            media = [InputMediaDocument(media=path, caption=os.path.basename(path)) for path in batch]
-
+            media = [
+                InputMediaDocument(media=FSInputFile(path), caption=os.path.basename(path))
+                for path in batch
+            ]
             await self.bot.send_media_group(chat_id=chat_id, media=media)
 
     # ---------------- RUN ----------------
