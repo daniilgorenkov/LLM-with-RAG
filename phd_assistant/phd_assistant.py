@@ -29,9 +29,8 @@ class PhDAssistant(AssitantPrompts, QualityChecker):
         return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
     def postprocess(self, text: str):
-        text = text.split("<END_OF_SECTION>")[0] # cut chat garbage
+        text = text.split("<END_OF_SECTION>")[0]  # cut chat garbage
 
-        
         for marker in [
             "Human:",
             "Assistant:",
@@ -130,7 +129,6 @@ class PhDAssistant(AssitantPrompts, QualityChecker):
                 mode="judge",
             )
 
-
             history.append(
                 {
                     "iteration": iteration,
@@ -144,8 +142,6 @@ class PhDAssistant(AssitantPrompts, QualityChecker):
                     "judge": judge,
                 }
             )
-
-
 
             if judge.strip().lower() == "да":
                 break
@@ -167,8 +163,8 @@ class PhDAssistant(AssitantPrompts, QualityChecker):
             )
 
             history[-1]["final"] = finalized
-            paths = self._save_iterative(section_name, history)
-
+            self._save_iterative(section_name, history)
+            return finalized
 
     def _save_iterative(self, section_name: str, history: list):
         section_dir = self.base_dir / section_name
