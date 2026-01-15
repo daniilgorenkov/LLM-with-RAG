@@ -15,7 +15,7 @@ class Paths:
     LOG_FILE = os.path.join(WORKDIR, "log.log")
     QA_DATASET = os.path.join(DATA, "qa_dataset.jsonl")
     QA_LORA_DATASET = os.path.join(DATA, f"qa_lora.jsonl")
-    LORA_QWEEN = os.path.join(DATA, "big_lora_qween")
+    LORA_QWEEN = os.path.join(DATA, "qwen_14b")
     PHD = os.path.join(DATA, "phd")
     PROMPTS = os.path.join(DATA, "prompts")
 
@@ -33,7 +33,7 @@ class EmbedderConfig:
 
 class LLMConfig:
     ONLINE: bool = False
-    BASE_MODEL = "/root/qwen2.5-7b-instruct"
+    BASE_MODEL = "/root/qwen2.5-14b-instruct"
     LORA_PATH: str = Paths.LORA_QWEEN
 
 

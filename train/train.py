@@ -10,7 +10,7 @@ if __name__ == "__main__":
     trainer = LoraQATrainer(
         model_name=config.LLMConfig.BASE_MODEL,
         data_path=config.Paths.QA_LORA_DATASET,
-        output_dir=os.path.join(config.Paths.DATA, "big_lora_qween"),
+        output_dir=os.path.join(config.Paths.DATA, "qwen_14b"),
         max_steps=config.LoRAConfig.EPOCHS,
     )
 
